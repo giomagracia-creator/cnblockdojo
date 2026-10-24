@@ -1,0 +1,155 @@
+{
+  "target": "player",
+  "mode": "attack",
+  "prompt": "",
+  "role": "",
+  "input": "/workspace/artifacts/sprite-plant/boy-raw.png",
+  "threshold": 40,
+  "edge_threshold": 150,
+  "duration": 200,
+  "rows": 2,
+  "cols": 2,
+  "cell_size": 128,
+  "fit_scale": 0.82,
+  "trim_border": 4,
+  "edge_clean_depth": 3,
+  "align": "feet",
+  "shared_scale": true,
+  "component_mode": "all",
+  "component_padding": 0,
+  "min_component_area": 60,
+  "edge_touch_margin": 0,
+  "frame_labels": [
+    "plant-1",
+    "plant-2",
+    "plant-3",
+    "plant-4"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "source_box": [
+        0,
+        0,
+        704,
+        704
+      ],
+      "component_mode": "all",
+      "component_count": 15,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        217,
+        55,
+        493,
+        603
+      ],
+      "edge_touch": false,
+      "output_size": [
+        52,
+        104
+      ],
+      "paste_position": [
+        38,
+        13
+      ]
+    },
+    {
+      "grid": [
+        0,
+        1
+      ],
+      "source_box": [
+        704,
+        0,
+        1408,
+        704
+      ],
+      "component_mode": "all",
+      "component_count": 19,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        140,
+        172,
+        500,
+        617
+      ],
+      "edge_touch": false,
+      "output_size": [
+        68,
+        85
+      ],
+      "paste_position": [
+        30,
+        32
+      ]
+    },
+    {
+      "grid": [
+        1,
+        0
+      ],
+      "source_box": [
+        0,
+        704,
+        704,
+        1408
+      ],
+      "component_mode": "all",
+      "component_count": 16,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        198,
+        124,
+        504,
+        585
+      ],
+      "edge_touch": false,
+      "output_size": [
+        58,
+        88
+      ],
+      "paste_position": [
+        35,
+        29
+      ]
+    },
+    {
+      "grid": [
+        1,
+        1
+      ],
+      "source_box": [
+        704,
+        704,
+        1408,
+        1408
+      ],
+      "component_mode": "all",
+      "component_count": 19,
+      "selected_component_area": null,
+      "selected_component_bbox": null,
+      "crop_bbox": [
+        143,
+        58,
+        436,
+        578
+      ],
+      "edge_touch": false,
+      "output_size": [
+        56,
+        99
+      ],
+      "paste_position": [
+        36,
+        18
+      ]
+    }
+  ],
+  "edge_touch_frames": []
+}

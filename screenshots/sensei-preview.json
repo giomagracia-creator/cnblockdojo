@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/sensei",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Sensei desk · BLOCKDOJO",
+      "hasCanvas": false,
+      "bodyTextLen": 1005,
+      "bodyTextHash": "6d4114ee5a3b342f5e7bdb84b01c066662b8fe6706979bc00b47ecb71b144922",
+      "bodyTextPrefix": "BLOCKDOJO Sensei desk Fast coins, fast checkout. The cave TV upd",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/sensei-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Sensei desk · BLOCKDOJO",
+      "hasCanvas": false,
+      "bodyTextLen": 1005,
+      "bodyTextHash": "6d4114ee5a3b342f5e7bdb84b01c066662b8fe6706979bc00b47ecb71b144922",
+      "bodyTextPrefix": "BLOCKDOJO Sensei desk Fast coins, fast checkout. The cave TV upd",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/sensei-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/sensei-preview.json"
+}

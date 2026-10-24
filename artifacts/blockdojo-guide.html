@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>BLOCKDOJO staff guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <style>
+      @page { size: letter; margin: 0; }
+      * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      html, body {
+        margin: 0; padding: 0; background: #100b08; color: #f4e6cf;
+        font-family: Nunito, "Segoe UI", sans-serif; font-weight: 600;
+      }
+      .page {
+        width: 8.5in; height: 11in; padding: 0.4in 0.44in 0.34in;
+        position: relative; overflow: hidden; page-break-after: always;
+        background: radial-gradient(900px 280px at 50% -40px, rgba(214, 58, 50, 0.28), transparent 60%), #140e09;
+      }
+      .page:last-child { page-break-after: auto; }
+      .mark {
+        font-family: "Press Start 2P", ui-monospace, monospace;
+        font-size: 10px; line-height: 1.6; letter-spacing: 0.04em; color: #f0c14b;
+      }
+      h1 { margin: 6px 0 0; font-size: 34px; line-height: 1; font-weight: 800; letter-spacing: -0.03em; }
+      h2 { margin: 0; font-size: 26px; line-height: 1; font-weight: 800; }
+      p { margin: 0; }
+      .lede { margin-top: 8px; max-width: 7.2in; color: #c4a882; font-size: 14px; line-height: 1.35; }
+      .foot {
+        position: absolute; left: 0.44in; right: 0.44in; bottom: 0.18in;
+        display: flex; justify-content: space-between; color: #8d7358;
+        font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      }
+      .hero {
+        margin-top: 12px; height: 3.15in; border: 3px solid #f0c14b; border-radius: 14px;
+        overflow: hidden; background: #000;
+      }
+      .hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block; }
+      .steps { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .step, .card {
+        background: #2c1d14; border: 2px solid #5a3d2a; border-radius: 12px; padding: 10px 12px 12px;
+      }
+      .num {
+        width: 22px; height: 22px; border-radius: 50%; background: #f0c14b; color: #2a1c08;
+        font-size: 13px; font-weight: 800; display: grid; place-items: center;
+      }
+      .step h3, .card h3, .rule h3 { margin: 6px 0 4px; font-size: 15px; }
+      .step p, .card p, .rule p, li { color: #c4a882; font-size: 13px; line-height: 1.35; }
+      .code {
+        margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+        border: 3px solid #f0c14b; border-radius: 12px; padding: 8px 14px; background: #24160f;
+      }
+      .code b { font-size: 26px; letter-spacing: 0.12em; color: #f0c14b; }
+      .code span { color: #c4a882; font-size: 12.5px; line-height: 1.35; max-width: 4.6in; }
+      .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+      .grid-2 { margin-top: 12px; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 10px; }
+      .card h3 { margin: 0 0 6px; }
+      ol, ul { margin: 0; padding-left: 16px; }
+      ol li + li, ul li + li { margin-top: 3px; }
+      .rules { display: grid; gap: 8px; }
+      .rule { background: #24160f; border: 2px solid #5a3d2a; border-radius: 10px; padding: 8px 10px; }
+      .rule strong { color: #f0c14b; font-size: 18px; }
+      .trio { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .kicker { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #f0c14b; }
+      .ladder { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+      .belt {
+        display: flex; align-items: center; gap: 6px; background: #2c1d14; border: 2px solid #5a3d2a;
+        border-radius: 999px; padding: 3px 8px 3px 4px; font-size: 11px; font-weight: 800;
+      }
+      .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(244, 230, 207, 0.35); }
+      .shots { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+      figure { margin: 0; }
+      figure img {
+        width: 100%; height: 2.05in; object-fit: cover; object-position: center 42%;
+        display: block; border-radius: 8px; border: 2px solid #5a3d2a; background: #000;
+      }
+      figcaption { margin-top: 3px; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; }
+      .split { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .fridge {
+        margin-top: 10px; border: 3px solid #d63a32; border-radius: 12px; background: #2a1210; padding: 10px 14px;
+      }
+      .fridge h3 { margin: 0 0 4px; color: #f4e6cf; font-size: 18px; }
+      .fridge p { color: #f4e6cf; font-size: 14px; line-height: 1.35; }
+    </style>
+  </head>
+  <body>
+    <section class="page">
+      <p class="mark">BLOCKDOJO</p>
+      <h1>Staff guide</h1>
+      <p class="lede">One cave for the whole center. The TV is the mine. Phones are the desk. Coins, EXP, and the roster stay in that one book.</p>
+      <div class="hero">
+        <img src="../public/art/cave.jpg" alt="The Block Dojo cave" />
+      </div>
+      <div class="steps">
+        <article class="step">
+          <div class="num">1</div>
+          <h3>Open the TV</h3>
+          <p>Leave the cave link on the TV. It shows the mine, the ticker, the phone code, and the belt show.</p>
+        </article>
+        <article class="step">
+          <div class="num">2</div>
+          <h3>Read the phone code</h3>
+          <p>A 4-character code sits on the TV. It changes at the top of every hour. Every phone in class can use the same code.</p>
+        </article>
+        <article class="step">
+          <div class="num">3</div>
+          <h3>Open the desk</h3>
+          <p>On a phone, open the same link and add /sensei. Type the code from the TV. A wrong or old code locks that phone until you type the new one.</p>
+        </article>
+      </div>
+      <div class="code">
+        <b>CNCE2026</b>
+        <span>Door code. It lasts until midnight on that device, then the door asks again. The cave, the roster, and the coins do not reset. There is no second dojo.</span>
+      </div>
+      <p class="lede">Phones do not stay linked all day. When the hour turns, read the new code off the TV. The desk never shows that code.</p>
+      <div class="foot"><span>Block Dojo · staff</span><span>1</span></div>
+    </section>
+
+    <section class="page">
+      <div class="head">
+        <div>
+          <p class="mark">DURING CLASS</p>
+          <h2>Coins and EXP</h2>
+        </div>
+        <p class="lede" style="margin: 0; text-align: right; max-width: 3.2in">Search the ninja. Pay the coins. EXP rises with them.</p>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <p class="kicker">Desk</p>
+          <h3>A payout</h3>
+          <ol>
+            <li>Search the ninja and tap their name. The card shows coins and EXP.</li>
+            <li>Hit +5, +10, +25, or type a custom amount and Add.</li>
+            <li>Coins leave the vault and land on that card. EXP goes up by the same amount.</li>
+            <li>The cave ticker shows the payout.</li>
+          </ol>
+          <p style="margin-top: 8px">Wrong tap? Hit the undo line. Undoing a payout takes those coins and that EXP back.</p>
+        </article>
+        <div class="rules">
+          <article class="rule">
+            <h3>Each tap</h3>
+            <p><strong>25</strong> coins max. Custom amounts stop there too.</p>
+          </article>
+          <article class="rule">
+            <h3>Same ninja</h3>
+            <p><strong>15s</strong> between pays, so a double tap cannot double-pay.</p>
+          </article>
+          <article class="rule">
+            <h3>The day</h3>
+            <p><strong>75</strong> on that card. Welcome coins count. A second card does not reset it.</p>
+          </article>
+        </div>
+      </div>
+      <div class="trio">
+        <article class="card">
+          <p class="kicker">Coin prize</p>
+          <h3>Redeem</h3>
+          <p>Needs enough coins, stock, and the belt. Coins leave the card and return to the vault. Stock drops by one. Hand the prize over.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">EXP prize</p>
+          <h3>Claim once</h3>
+          <p>Needs enough EXP and the belt. EXP is not spent. Each ninja can claim that prize one time. Undo only clears the claim.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">Bonus</p>
+          <h3>Achievements</h3>
+          <p>Daily and weekly bonuses sit outside the 75. They still add the same EXP. Each ninja can take each one once in that period.</p>
+        </article>
+      </div>
+      <div class="split">
+        <article class="card">
+          <p class="kicker">TV</p>
+          <h3>EXP path</h3>
+          <p>The EXP button covers most of the cave. Names are A to Z, not a race. The bar runs toward the top EXP prize. Cheaper EXP prizes are marks on the bar. The phone code stays above the board.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">Ceremony</p>
+          <h3>Belt up</h3>
+          <p>Belt up moves one rank and plays that belt’s show on the whole TV. It sits above the EXP board, pauses the music, and loops until the TV is tapped or a key is pressed. The phone does not stop it.</p>
+        </article>
+      </div>
+      <div class="foot"><span>Block Dojo · staff</span><span>2</span></div>
+    </section>
+
+    <section class="page">
+      <div class="head">
+        <div>
+          <p class="mark">THE BOOK</p>
+          <h2>One card. One fridge rule.</h2>
+        </div>
+      </div>
+      <p class="lede">The 75 lives on the card. A new name does not start a new day.</p>
+      <div class="fridge">
+        <p class="kicker">Do this every time</p>
+        <h3>The fridge is paid in ninja coins.</h3>
+        <p>Nothing from the fridge is free. Drinks, snacks, all of it. The ninja tells you what they want. You take the coins off their card first. Then they may take it. Not enough coins means they wait. Do not hand it over and charge them later.</p>
+      </div>
+      <div class="split">
+        <article class="card">
+          <h3>Add a ninja</h3>
+          <ul>
+            <li>Roster, then Add ninja. First name and one last initial.</li>
+            <li>Welcome coins are 10. They count toward today’s 75 and add the same EXP.</li>
+            <li>If that name is already here, even resting, the desk refuses a second card.</li>
+            <li>Two real kids with the same name and initial need a nickname or a different initial.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Rest a ninja</h3>
+          <ul>
+            <li>Edit the card and mark it archived.</li>
+            <li>Show archived, edit, and uncheck it to bring the same card back. Today’s coins stay.</li>
+            <li>After 30 days of rest, coins still on that card return to the vault. The ledger records it.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="split">
+        <article class="card">
+          <p class="kicker">Close of day</p>
+          <h3>Save the day</h3>
+          <p>Downloads an Excel file for that day. It does not email anyone. The file has three sheets: the audit log, every ninja’s coins, EXP, and redeems, and the closing totals. The mine is one total, not a row per minute.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">The vault</p>
+          <h3>Where coins live</h3>
+          <p>Pays, welcome coins, and achievements come out of the vault. Redeems, undos, and 30-day returns put coins back. While a screen is open, the mine adds 10 to 50 coins a minute. It does not catch up overnight. Prize prices can be set up to 10,000.</p>
+        </article>
+      </div>
+      <p class="lede">Editing a coin balance does not add EXP. New prizes and balance fixes stay with the director.</p>
+      <div class="foot"><span>Block Dojo · staff</span><span>3</span></div>
+    </section>
+
+    <section class="page">
+      <div class="head">
+        <div>
+          <p class="mark">BELT SHOW</p>
+          <h2>Yellow through Brown</h2>
+        </div>
+      </div>
+      <p class="lede">White is the starting belt. There is no ceremony for white. Belt up from white plays Yellow. These are stills from the TV show.</p>
+      <div class="ladder">
+        <span class="belt"><i class="dot" style="background:#f3eee4"></i>White</span>
+        <span class="belt"><i class="dot" style="background:#f0c14b"></i>Yellow</span>
+        <span class="belt"><i class="dot" style="background:#e07a2f"></i>Orange</span>
+        <span class="belt"><i class="dot" style="background:#3f8f4e"></i>Green</span>
+        <span class="belt"><i class="dot" style="background:#3c6fb0"></i>Blue</span>
+        <span class="belt"><i class="dot" style="background:#7a4ea3"></i>Purple</span>
+        <span class="belt"><i class="dot" style="background:#8a5a32"></i>Brown</span>
+      </div>
+      <div class="shots">
+        <figure><img src="guide-art/yellow.jpg" alt="Yellow belt ceremony" /><figcaption><i class="dot" style="background:#f0c14b"></i>Yellow</figcaption></figure>
+        <figure><img src="guide-art/orange.jpg" alt="Orange belt ceremony" /><figcaption><i class="dot" style="background:#e07a2f"></i>Orange</figcaption></figure>
+        <figure><img src="guide-art/green.jpg" alt="Green belt ceremony" /><figcaption><i class="dot" style="background:#3f8f4e"></i>Green</figcaption></figure>
+        <figure><img src="guide-art/blue.jpg" alt="Blue belt ceremony" /><figcaption><i class="dot" style="background:#3c6fb0"></i>Blue</figcaption></figure>
+        <figure><img src="guide-art/purple.jpg" alt="Purple belt ceremony" /><figcaption><i class="dot" style="background:#7a4ea3"></i>Purple</figcaption></figure>
+        <figure><img src="guide-art/brown.jpg" alt="Brown belt ceremony" /><figcaption><i class="dot" style="background:#8a5a32"></i>Brown</figcaption></figure>
+      </div>
+      <div class="foot"><span>Block Dojo · staff</span><span>4</span></div>
+    </section>
+
+    <section class="page">
+      <div class="head">
+        <div>
+          <p class="mark">BELT SHOW</p>
+          <h2>Red through Gold</h2>
+        </div>
+      </div>
+      <p class="lede">Gold is the last belt. Belt up stops there. The show takes the whole TV and loops until the TV is tapped or a key is pressed. What each belt teaches is in the family guide.</p>
+      <div class="ladder">
+        <span class="belt"><i class="dot" style="background:#d63a32"></i>Red</span>
+        <span class="belt"><i class="dot" style="background:#221812"></i>Black</span>
+        <span class="belt"><i class="dot" style="background:#cd7f32"></i>Bronze</span>
+        <span class="belt"><i class="dot" style="background:#d9dde3"></i>Silver</span>
+        <span class="belt"><i class="dot" style="background:#e5e4e2"></i>Platinum</span>
+        <span class="belt"><i class="dot" style="background:#e6b422"></i>Gold</span>
+      </div>
+      <div class="shots">
+        <figure><img src="guide-art/red.jpg" alt="Red belt ceremony" /><figcaption><i class="dot" style="background:#d63a32"></i>Red</figcaption></figure>
+        <figure><img src="guide-art/black.jpg" alt="Black belt ceremony" /><figcaption><i class="dot" style="background:#221812"></i>Black</figcaption></figure>
+        <figure><img src="guide-art/bronze.jpg" alt="Bronze belt ceremony" /><figcaption><i class="dot" style="background:#cd7f32"></i>Bronze</figcaption></figure>
+        <figure><img src="guide-art/silver.jpg" alt="Silver belt ceremony" /><figcaption><i class="dot" style="background:#d9dde3"></i>Silver</figcaption></figure>
+        <figure><img src="guide-art/platinum.jpg" alt="Platinum belt ceremony" /><figcaption><i class="dot" style="background:#e5e4e2"></i>Platinum</figcaption></figure>
+        <figure><img src="guide-art/gold.jpg" alt="Gold belt ceremony" /><figcaption><i class="dot" style="background:#e6b422"></i>Gold</figcaption></figure>
+      </div>
+      <div class="foot"><span>Block Dojo · staff</span><span>5</span></div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>BLOCKDOJO for ninjas and families</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <style>
+      @page { size: letter; margin: 0; }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0; padding: 0; background: #fff; color: #1a120c;
+        font-family: Nunito, "Segoe UI", sans-serif; font-weight: 600;
+      }
+      .page {
+        width: 8.5in; height: 11in; padding: 0.5in 0.55in 0.42in;
+        position: relative; overflow: hidden; page-break-after: always;
+        background: #fff;
+      }
+      .page:last-child { page-break-after: auto; }
+      .mark {
+        font-family: "Press Start 2P", ui-monospace, monospace;
+        font-size: 9px; line-height: 1.55; color: #6b3a12; letter-spacing: 0.03em;
+      }
+      h1 { margin: 6px 0 0; font-size: 34px; line-height: 0.98; font-weight: 800; letter-spacing: -0.03em; color: #1a120c; }
+      h2 { margin: 0; font-size: 26px; line-height: 1; font-weight: 800; color: #1a120c; }
+      h3 { margin: 0 0 4px; font-size: 16px; color: #1a120c; }
+      p { margin: 0; }
+      .lede { margin-top: 8px; color: #1a120c; font-size: 15px; line-height: 1.4; }
+      .foot {
+        position: absolute; left: 0.55in; right: 0.55in; bottom: 0.18in;
+        display: flex; justify-content: space-between; color: #3d2b1f;
+        font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        border-top: 1px solid #1a120c; padding-top: 6px;
+      }
+      img, .swatch, .step b { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .hero {
+        margin-top: 10px; height: 3.7in; border: 2px solid #1a120c; border-radius: 10px; overflow: hidden; background: #f6f1ea;
+      }
+      .hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; display: block; }
+      .kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #6b3a12; }
+      .grid-3 { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .grid-2 { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .card {
+        background: #fff; border: 1.5px solid #1a120c; border-radius: 10px; padding: 10px 12px 12px;
+      }
+      .card p, li { color: #1a120c; font-size: 14px; line-height: 1.35; }
+      .card strong { color: #1a120c; }
+      ul { margin: 6px 0 0; padding-left: 18px; }
+      li + li { margin-top: 4px; }
+      .ladder { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+      .chip {
+        display: flex; align-items: center; gap: 6px; background: #fff; border: 1.5px solid #1a120c;
+        border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 800; color: #1a120c;
+      }
+      .poster { display: flex; flex-direction: column; height: calc(100% - 28px); }
+      .giant {
+        margin-top: 10px; font-size: 46px; line-height: 0.95; font-weight: 800; letter-spacing: -0.04em; max-width: 7.2in;
+      }
+      .giant span { color: #9f1d1d; }
+      .poster .lede { font-size: 18px; max-width: 7in; }
+      .steps { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+      .step {
+        background: #fff; border: 2px solid #9f1d1d; border-radius: 12px; padding: 14px 12px 16px; min-height: 1.9in;
+      }
+      .step b {
+        display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+        background: #1a120c; color: #fff; font-size: 16px;
+      }
+      .step h3 { margin-top: 8px; font-size: 18px; }
+      .step p { margin-top: 6px; color: #1a120c; font-size: 14px; line-height: 1.35; }
+      .banner {
+        margin-top: auto; margin-bottom: 8px; border: 2px solid #1a120c; border-radius: 10px;
+        background: #fff; padding: 12px 14px; font-size: 16px; font-weight: 800; line-height: 1.35;
+      }
+      .items { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .item {
+        background: #fff; border: 1.5px solid #1a120c; border-radius: 10px; padding: 6px; min-height: 2.85in;
+      }
+      .item img {
+        width: 100%; height: 1.15in; object-fit: cover; border-radius: 6px; display: block; background: #f6f1ea;
+        border: 1px solid #d9cfc2;
+      }
+      .item h3 { margin-top: 5px; font-size: 14px; }
+      .price { color: #6b3a12; font-weight: 800; font-size: 12.5px; margin-top: 1px; }
+      .item p { color: #1a120c; font-size: 12px; line-height: 1.28; margin-top: 2px; }
+      .exp { color: #5b21b6; }
+      .belt-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+      .swatch { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #1a120c; margin-right: 8px; vertical-align: -1px; }
+      .official { margin-top: 4px; color: #1a120c; font-size: 15px; }
+      .belt-grid { margin-top: 8px; display: grid; grid-template-columns: 4.2in 1fr; gap: 10px; align-items: stretch; }
+      .still {
+        position: relative; height: 7.45in; border-radius: 10px; overflow: hidden;
+        border: 2px solid #1a120c; background: #f6f1ea;
+      }
+      .still img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block; }
+      .still.welcome { background: #111; }
+      .still.welcome img.under {
+        position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 45%;
+      }
+      .still.welcome img.belt {
+        position: relative; z-index: 1; object-fit: contain; object-position: center; background: transparent; height: 100%;
+      }
+      .learn { background: #fff; border: 1.5px solid #1a120c; border-radius: 10px; padding: 10px 10px 12px; }
+      .learn li { font-size: 13px; color: #1a120c; }
+      .where { margin-top: 8px; color: #1a120c; font-size: 13px; line-height: 1.35; font-weight: 800; }
+      .next {
+        position: absolute; left: 0.55in; right: 0.55in; bottom: 0.46in;
+        color: #1a120c; font-size: 13px; font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="page">
+      <p class="mark">BLOCKDOJO</p>
+      <h1>For ninjas and families</h1>
+      <p class="lede">The cave on the TV is your dojo’s coin book. You earn coins in class. You earn EXP for the same work. You spend coins at the shop and at the fridge.</p>
+      <div class="hero">
+        <img src="../public/art/cave.jpg" alt="The Block Dojo cave" />
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <p class="kicker">Coins</p>
+          <h3>To spend</h3>
+          <p>Senseis pay your card. Coins buy shop prizes and anything from the fridge.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">EXP</p>
+          <h3>To keep</h3>
+          <p>EXP rises with every coin you earn. It is never spent. Some prizes are claimed once with EXP.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">Belts</p>
+          <h3>The Code Ninjas path</h3>
+          <p>White to Gold. Each page after the shop is one belt and what your ninja learns there.</p>
+        </article>
+      </div>
+      <div class="foot"><span>Block Dojo · families</span><span>1</span></div>
+    </section>
+
+    <section class="page">
+      <p class="mark">THE CAVE</p>
+      <h1>What the game is</h1>
+      <p class="lede">Block Dojo is the cave you see at the dojo. It is not a second class. It is how the center keeps your coins, your EXP, and your belt in one place.</p>
+      <div class="hero" style="height: 3.15in">
+        <img src="guide-art/gold.jpg" alt="A belt ceremony on the cave TV" />
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>On the TV</h3>
+          <ul>
+            <li>The mine is the cave’s coin pile. Pays come out of it.</li>
+            <li>When a sensei pays you, your name runs across the screen.</li>
+            <li>Belt up plays that belt’s show on the whole TV.</li>
+            <li>The EXP button opens a board of every ninja, A to Z, with a bar toward the biggest EXP prize.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>On your card</h3>
+          <ul>
+            <li>One ninja, one card. A second card does not start a new pile of coins.</li>
+            <li>Your sensei searches your name and pays that card.</li>
+            <li>You do not tap the shop yourself. You ask, and the sensei redeems or claims it.</li>
+            <li>Parents: this is dojo coins, not a charge to your card at home.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="foot"><span>Block Dojo · families</span><span>2</span></div>
+    </section>
+
+    <section class="page">
+      <p class="mark">COINS</p>
+      <h1>How you earn them</h1>
+      <p class="lede">Coins are for spending. They come off your card when you buy something.</p>
+      <div class="grid-3">
+        <article class="card">
+          <p class="kicker">A payout</p>
+          <h3>Up to 25</h3>
+          <p>A sensei can give 5, 10, or 25 at a time. They wait 15 seconds before paying you again.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">A day</p>
+          <h3>75 on your card</h3>
+          <p>That is the cap for class payouts, including welcome coins when you first join. It does not reset if someone types your name again.</p>
+        </article>
+        <article class="card">
+          <p class="kicker">Bonuses</p>
+          <h3>Outside the 75</h3>
+          <p>Daily and weekly achievements add extra coins. They do not count against the cap. You can earn each one once in that period.</p>
+        </article>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>Where coins go</h3>
+          <ul>
+            <li>Shop prizes that say “coins.”</li>
+            <li>Anything from the fridge. That part is new. The next page is the rule.</li>
+            <li>If a sensei undoes a payout, those coins leave your card.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>They are not cash</h3>
+          <p>You cannot buy coins. You earn them by coding, helping, and the challenges your sensei posts. If the card is short, you earn more next class. Nobody charges a parent at the fridge.</p>
+        </article>
+      </div>
+      <div class="ladder">
+        <span class="chip">Welcome coins: 10, and they count today</span>
+        <span class="chip">Same EXP as the coins you earn</span>
+      </div>
+      <div class="foot"><span>Block Dojo · families</span><span>3</span></div>
+    </section>
+
+    <section class="page">
+      <div class="poster">
+        <p class="mark">IMPORTANT CHANGE</p>
+        <h1 class="giant">The fridge <span>takes coins.</span></h1>
+        <p class="lede">Ninjas now use ninja coins to purchase anything from the fridge. Drinks. Snacks. All of it. It is not free anymore.</p>
+        <div class="steps">
+          <article class="step">
+            <b>1</b>
+            <h3>Pick it</h3>
+            <p>Choose what you want. Look before you open the door and take it.</p>
+          </article>
+          <article class="step">
+            <b>2</b>
+            <h3>Tell a sensei</h3>
+            <p>They look up your card and take the coins off before you get it.</p>
+          </article>
+          <article class="step">
+            <b>3</b>
+            <h3>Then take it</h3>
+            <p>Not enough coins means it stays in the fridge. You can earn more in class.</p>
+          </article>
+        </div>
+        <div class="banner">Coins first. Then the fridge. Do not take it and pay later. This is your ninja coins, not money from home.</div>
+      </div>
+      <div class="foot"><span>Block Dojo · families</span><span>4</span></div>
+    </section>
+
+    <section class="page">
+      <p class="mark">EXP</p>
+      <h1>It stays with you</h1>
+      <p class="lede">EXP is the long path. Coins get spent. EXP does not.</p>
+      <div class="hero" style="height: 3.05in">
+        <img src="guide-art/purple.jpg" alt="Purple belt ceremony" />
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>How EXP goes up</h3>
+          <ul>
+            <li>Every coin you earn adds the same EXP. A +10 payout is +10 EXP.</li>
+            <li>Welcome coins and daily or weekly achievements count too.</li>
+            <li>A sensei fixing a balance does not add EXP.</li>
+            <li>If a payout or achievement is undone, that EXP comes back off.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>How you use it</h3>
+          <ul>
+            <li>You do not spend it. A claim does not lower the number.</li>
+            <li>EXP prizes can be claimed once, when your EXP is high enough and your belt is high enough.</li>
+            <li>On the TV, open EXP. Find your name. The bar shows the way to the top EXP prize.</li>
+            <li>The list is alphabetical. It is not a leaderboard.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="foot"><span>Block Dojo · families</span><span>5</span></div>
+    </section>
+
+    <section class="page">
+      <p class="mark">THE SHOP</p>
+      <h1>What you can claim</h1>
+      <p class="lede">Ask a sensei. They pick your name, then tap the prize. You need the price and the belt. Coin prizes also need to be in stock.</p>
+      <div class="items">
+        <article class="item">
+          <img src="../public/art/items/stickers.jpg" alt="Sticker pack" />
+          <h3>Sticker Pack</h3>
+          <p class="price">15 coins · any belt</p>
+          <p>Sensei taps Redeem. 15 coins leave your card. One pack leaves the shelf.</p>
+        </article>
+        <article class="item">
+          <img src="../public/art/items/patch.jpg" alt="Code patch" />
+          <h3>Code Patch</h3>
+          <p class="price">25 coins · Yellow+</p>
+          <p>Same as a coin redeem. You need a Yellow belt or higher.</p>
+        </article>
+        <article class="item">
+          <img src="../public/art/items/keychain.jpg" alt="LED keychain" />
+          <h3>LED Keychain</h3>
+          <p class="price">40 coins · any belt</p>
+          <p>Coins come off your card. The sensei hands you the keychain.</p>
+        </article>
+        <article class="item">
+          <img src="../public/art/items/dragon.jpg" alt="3D printed dragon" />
+          <h3>3D Printed Dragon</h3>
+          <p class="price">80 coins · Green+</p>
+          <p>Green belt or higher. Coins leave your card. One dragon leaves the shelf.</p>
+        </article>
+        <article class="item">
+          <img src="../public/art/items/figure.jpg" alt="Mini figure" />
+          <h3>Mini Figure</h3>
+          <p class="price">120 coins · Blue+</p>
+          <p>Blue belt or higher. A coin redeem, same as the smaller prizes.</p>
+        </article>
+        <article class="item">
+          <img src="../public/art/items/chest.jpg" alt="Treasure chest" />
+          <h3>Treasure Chest</h3>
+          <p class="price exp">200 EXP · Purple+ · once</p>
+          <p>This one is EXP, not coins. Your EXP stays. You can claim it one time.</p>
+        </article>
+      </div>
+      <p class="lede" style="margin-top: 8px; font-size: 13px">Coin prizes can be bought again while they are in stock. The fridge is not in this shop. Fridge items are paid in coins at the desk, then taken.</p>
+      <div class="foot"><span>Block Dojo · families</span><span>6</span></div>
+    </section>
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 1 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#f3eee4"></i>White</h1>
+          <p class="official">Introduction to IMPACT and coding with blocks</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still welcome">
+          <img class="under" src="../public/art/cave.jpg" alt="" />
+          <img class="belt" src="guide-art/white-belt.png" alt="White belt. Welcome ninja. Enter the cave." />
+        </div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>Make a sprite, the character in your game.</li>
+            <li>Put instructions in order so the game does one thing, then the next.</li>
+            <li>Move the sprite and notice when it overlaps something else.</li>
+            <li>Use variables, functions, and the loop that keeps a game running.</li>
+            <li>Fire projectiles, use a simple “if,” and add animation and music.</li>
+          </ul>
+          <p class="where">This is the start. There is no white-belt show. Your first ceremony on the TV is Yellow.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Yellow</p>
+      <div class="foot"><span>Code Ninjas CREATE · White</span><span>7</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 2 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#c8960c"></i>Yellow</h1>
+          <p class="official">Advanced coding with blocks</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#c8960c"><img src="guide-art/yellow.jpg" alt="Yellow belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>Build tile maps, both top-down worlds and side-view platformers.</li>
+            <li>React when a sprite or a tile is touched.</li>
+            <li>Use variables and arrays, and both simple and advanced loops.</li>
+            <li>Write functions with inputs and functions without them.</li>
+            <li>Add simple game physics and true-or-false logic.</li>
+          </ul>
+          <p class="where">Still in IMPACT, still with blocks. When you belt up, this show plays on the cave TV.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Orange</p>
+      <div class="foot"><span>Code Ninjas CREATE · Yellow</span><span>8</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 3 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#e07a2f"></i>Orange</h1>
+          <p class="official">Transition to coding with JavaScript</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#e07a2f"><img src="guide-art/orange.jpg" alt="Orange belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>The same game ideas, now typed in JavaScript.</li>
+            <li>Create and change variables, and update a sprite’s properties.</li>
+            <li>Use events, loops, and conditionals, including nested ones.</li>
+            <li>Use assignment, equals, and true-or-false operators.</li>
+            <li>Make sprite kinds, overlap events, and a for-loop that changes as it runs.</li>
+          </ul>
+          <p class="where">This is the step from blocks into real code. The orange show plays when you earn it.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Green</p>
+      <div class="foot"><span>Code Ninjas CREATE · Orange</span><span>9</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 4 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#3f8f4e"></i>Green</h1>
+          <p class="official">Intermediate coding with JavaScript</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#3f8f4e"><img src="guide-art/green.jpg" alt="Green belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>Manage art and assets, including tile maps and their events.</li>
+            <li>Move sprites with physics.</li>
+            <li>Remix pixel art, then draw your own, and build sprite packs.</li>
+            <li>Animate, and add menus, on-screen text, and other UI.</li>
+            <li>Use raycasting to detect what is in front of a sprite.</li>
+          </ul>
+          <p class="where">The 3D printed dragon in the shop opens at this belt. The green show plays on the TV.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Blue</p>
+      <div class="foot"><span>Code Ninjas CREATE · Green</span><span>10</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 5 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#3c6fb0"></i>Blue</h1>
+          <p class="official">Advanced coding with JavaScript</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#3c6fb0"><img src="guide-art/blue.jpg" alt="Blue belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>Build larger games, not a single trick.</li>
+            <li>Plan a project, make it, and improve it in passes.</li>
+            <li>Use the deeper tools in MakeCode Arcade.</li>
+            <li>Keep a big project organized so it still runs.</li>
+          </ul>
+          <p class="where">The mini figure in the shop opens at this belt. The blue show plays when you belt up.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Purple</p>
+      <div class="foot"><span>Code Ninjas CREATE · Blue</span><span>11</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 6 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#7a4ea3"></i>Purple</h1>
+          <p class="official">Professional development environment</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#7a4ea3"><img src="guide-art/purple.jpg" alt="Purple belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>The Unity workspace, a tool professional game teams use.</li>
+            <li>Intermediate game-design ideas, past a single screen.</li>
+            <li>Custom animations.</li>
+            <li>The foundations of building a game in Unity.</li>
+          </ul>
+          <p class="where">The Treasure Chest opens here: 200 EXP, once, and your EXP stays. The purple show plays on the TV.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Brown</p>
+      <div class="foot"><span>Code Ninjas CREATE · Purple</span><span>12</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 7 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#8a5a32"></i>Brown</h1>
+          <p class="official">Advanced programming</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#8a5a32"><img src="guide-art/brown.jpg" alt="Brown belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>Meshes and art assets in a 3D scene.</li>
+            <li>Ray casting, so the game can tell what a line of sight hits.</li>
+            <li>Unity’s built-in tools.</li>
+            <li>Object-oriented programming in C#: objects that hold both data and actions.</li>
+          </ul>
+          <p class="where">This is text-based C#, not blocks. The brown show plays when you earn the belt.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Red</p>
+      <div class="foot"><span>Code Ninjas CREATE · Brown</span><span>13</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 8 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#d63a32"></i>Red</h1>
+          <p class="official">Advanced game design</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#d63a32"><img src="guide-art/red.jpg" alt="Red belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>Scene management: more than one place in a game.</li>
+            <li>World design, so those places feel like a world.</li>
+            <li>Game mechanics the player can learn and use.</li>
+            <li>The Unity Asset Store, and how to bring outside assets into a project.</li>
+          </ul>
+          <p class="where">The red show takes the cave TV when a sensei belts you up.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Black</p>
+      <div class="foot"><span>Code Ninjas CREATE · Red</span><span>14</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 9 OF 13 · CODE NINJAS CREATE</p>
+          <h1><i class="swatch" style="background:#221812"></i>Black</h1>
+          <p class="official">Custom game development</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#221812"><img src="guide-art/black.jpg" alt="Black belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">What your ninja learns</p>
+          <ul>
+            <li>Storyboard the game before you build it.</li>
+            <li>Plan the work, then make a prototype.</li>
+            <li>Playtest, and change the game because of what players do.</li>
+            <li>Publish: take a project from an idea to something other people can play.</li>
+          </ul>
+          <p class="where">Black belt finishes the main path. After that come Bronze, Silver, Platinum, and Gold.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Bronze</p>
+      <div class="foot"><span>Code Ninjas CREATE · Black</span><span>15</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 10 OF 13 · ADVANCED</p>
+          <h1><i class="swatch" style="background:#cd7f32"></i>Bronze</h1>
+          <p class="official">Black belt, bronze. Professional engines.</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#cd7f32"><img src="guide-art/bronze.jpg" alt="Bronze belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">At this belt</p>
+          <ul>
+            <li>Bronze, Silver, Platinum, and Gold come after Black. They are the advanced belts.</li>
+            <li>Your ninja uses Unity and Godot, the same engines professional studios use.</li>
+            <li>Bronze is the first of that track. They learn the workspace, build a scene, and get a project running.</li>
+            <li>The sensei sets the project for this belt.</li>
+          </ul>
+          <p class="where">The bronze show plays on the whole TV when you earn it.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Silver</p>
+      <div class="foot"><span>Code Ninjas CREATE · Bronze</span><span>16</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 11 OF 13 · ADVANCED</p>
+          <h1><i class="swatch" style="background:#8b9099"></i>Silver</h1>
+          <p class="official">Black belt, silver. Deeper in the engine.</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#8b9099"><img src="guide-art/silver.jpg" alt="Silver belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">At this belt</p>
+          <ul>
+            <li>Your ninja keeps working in Unity and Godot.</li>
+            <li>They build past a first scene: movement, cameras, and space a player can travel.</li>
+            <li>Projects get bigger, so they learn to keep the work organized.</li>
+            <li>The sensei sets the project for this belt.</li>
+          </ul>
+          <p class="where">The silver show plays on the cave TV when you belt up.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Platinum</p>
+      <div class="foot"><span>Code Ninjas CREATE · Silver</span><span>17</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 12 OF 13 · ADVANCED</p>
+          <h1><i class="swatch" style="background:#6b7280"></i>Platinum</h1>
+          <p class="official">Black belt, platinum. One whole game.</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#6b7280"><img src="guide-art/platinum.jpg" alt="Platinum belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">At this belt</p>
+          <ul>
+            <li>Your ninja is near the top of the advanced track, still in Unity and Godot.</li>
+            <li>They build the systems that make a project feel like one game: goals, menus, and a loop a player can finish.</li>
+            <li>Polish matters here. A scene that runs is not the same as a game someone can play.</li>
+            <li>The sensei sets the project for this belt.</li>
+          </ul>
+          <p class="where">The platinum show plays on the whole TV.</p>
+        </article>
+      </div>
+      <p class="next">Next belt: Gold</p>
+      <div class="foot"><span>Code Ninjas CREATE · Platinum</span><span>18</span></div>
+    </section>
+
+    <section class="page">
+      <div class="belt-head">
+        <div>
+          <p class="mark">BELT 13 OF 13 · ADVANCED</p>
+          <h1><i class="swatch" style="background:#c8960c"></i>Gold</h1>
+          <p class="official">Black belt, gold. The top of the path.</p>
+        </div>
+      </div>
+      <div class="belt-grid">
+        <div class="still" style="border-color:#c8960c"><img src="guide-art/gold.jpg" alt="Gold belt ceremony" /></div>
+        <article class="learn">
+          <p class="kicker">At this belt</p>
+          <ul>
+            <li>Gold is the last belt. There is no belt after it.</li>
+            <li>Your ninja finishes an original game in Unity or Godot.</li>
+            <li>They design it, build it, and playtest it.</li>
+            <li>Belt up stops here. The gold show is the last ceremony on the cave TV.</li>
+          </ul>
+          <p class="where">Coins and EXP still work the same way. The fridge still takes coins. The shop still follows the belt on your card.</p>
+        </article>
+      </div>
+      <p class="next">You are at the top of the path.</p>
+      <div class="foot"><span>Code Ninjas CREATE · Gold</span><span>19</span></div>
+    </section>
+  </body>
+</html>
