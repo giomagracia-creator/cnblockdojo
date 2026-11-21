@@ -16,7 +16,7 @@ const field = "w-full min-w-0";
 function CoinMark() {
   return (
     <img
-      src="/art/sprites/props/prop-1.png"
+      src="/art/sprites/props/prop-1.png?v=winter"
       alt=""
       className="inline-block size-5 object-contain align-text-bottom"
       style={{ imageRendering: "pixelated" }}
@@ -97,6 +97,7 @@ export function SenseiDesk() {
   const removeAchievement = useDojo((state) => state.removeAchievement);
   const promoteBelt = useDojo((state) => state.promoteBelt);
   const dayLedger = useDojo((state) => state.dayLedger);
+  const playStory = useDojo((state) => state.playStory);
   const phoneLocked = useDojo((state) => state.phoneLocked);
   const expClaims = useDojo((state) => state.expClaims);
   const door = useDoor();
@@ -122,6 +123,7 @@ export function SenseiDesk() {
   const [custom, setCustom] = useState("");
   const [belting, setBelting] = useState(false);
   const [savingDay, setSavingDay] = useState(false);
+  const [startingStory, setStartingStory] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [rosterQuery, setRosterQuery] = useState("");
   const [studentForm, setStudentForm] = useState<null | { mode: "add" } | { mode: "edit"; id: string }>(null);
@@ -133,6 +135,21 @@ export function SenseiDesk() {
     const timer = window.setInterval(() => setClock(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+  useEffect(() => {
+    if (phoneLocked || directorUntil <= Date.now()) return;
+    let timer = window.setTimeout(() => lockDirector(), 120_000);
+    const bump = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => lockDirector(), 120_000);
+    };
+    window.addEventListener("pointerdown", bump, true);
+    window.addEventListener("keydown", bump, true);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pointerdown", bump, true);
+      window.removeEventListener("keydown", bump, true);
+    };
+  }, [phoneLocked, directorUntil, lockDirector]);
   const director = directorUntil > clock;
   const needDirector = () => {
     if (directorUntil > Date.now()) return true;
@@ -254,10 +271,21 @@ export function SenseiDesk() {
     }
   };
 
+  const showStory = async () => {
+    setStartingStory(true);
+    try {
+      const result = await playStory();
+      flash(result.ok ? { tone: "ok", text: "The cave will play the story." } : { tone: "no", text: result.reason });
+    } finally {
+      setStartingStory(false);
+    }
+  };
+
   if (door === "locked") return <AccessGate />;
   if (door === "wait" || !hydrated) return <DojoLoading />;
   if (phoneLocked) return <PhoneLink />;
   if (!code) return <DojoLoading />;
+  if (!director) return <PinPad gate onClose={() => undefined} />;
 
   return (
     <main className="mx-auto min-h-dvh max-w-6xl px-3 py-4 sm:px-6 sm:py-6">
@@ -285,6 +313,14 @@ export function SenseiDesk() {
             className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md border-2 border-accent bg-surface px-3 font-extrabold disabled:cursor-not-allowed disabled:text-muted"
           >
             {savingDay ? "Exporting…" : "Save the day"}
+          </button>
+          <button
+            type="button"
+            disabled={startingStory}
+            onClick={() => void showStory()}
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md border-2 border-accent bg-surface px-3 font-extrabold disabled:cursor-not-allowed disabled:text-muted"
+          >
+            {startingStory ? "Starting…" : "Cave story"}
           </button>
           <div className="flex min-h-11 shrink-0 items-center gap-2 rounded-md border-2 border-border bg-surface px-3 font-extrabold">
             <CoinMark />
@@ -327,7 +363,7 @@ export function SenseiDesk() {
                 director ? "border-accent bg-surface text-accent" : "border-border bg-surface text-fg"
               }`}
             >
-              {director ? "Lock director" : "Director pin"}
+              {director ? "Lock desk" : "Director pin"}
             </button>
             <Link
               to="/"
@@ -763,7 +799,7 @@ export function SenseiDesk() {
           <div className="mt-3 rounded-lg border-2 border-border bg-surface p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-bold text-muted">
-                {director ? "Director desk is open for 10 minutes." : "Prices, stock, and new prizes need the director pin."}
+                {director ? "The desk is unlocked." : "Prices, stock, and new prizes need the director pin."}
               </p>
               <button
                 type="button"

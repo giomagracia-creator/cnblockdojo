@@ -26,7 +26,7 @@ export function JoinScreen({ role }: { role: DojoRole }) {
       <p className="font-pixel text-pixel text-accent">BLOCKDOJO</p>
       <h1 className="mt-2 text-3xl font-extrabold">{role === "display" ? "This screen is the cave." : "This screen is the desk."}</h1>
       <p className="mt-2 font-bold text-muted">
-        One code ties the TV and the phone together. Open it on the first screen, then type it on the other.
+        One screen is the cave. The other is the desk at /sensei. The desk code on the cave changes every hour.
       </p>
       <button
         type="button"

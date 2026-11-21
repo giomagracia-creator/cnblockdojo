@@ -1,9 +1,9 @@
 export const PAYOUT_MAX = 25;
 export const DAILY_MAX = 75;
-export const PAYOUT_GAP_MS = 15_000;
+export const PAYOUT_GAP_MS = 10_000;
 export const WELCOME_MAX = 10;
 export const DIRECTOR_PIN = "010125";
-export const DIRECTOR_MS = 10 * 60 * 1000;
+export const DIRECTOR_MS = 8 * 60 * 60 * 1000;
 export const PIN_TRIES = 5;
 export const PIN_LOCK_MS = 30_000;
 export const PRICE_MAX = 500;

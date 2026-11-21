@@ -103,8 +103,8 @@ function loadImage(src: string) {
   });
 }
 
-async function loadFrames(prefix: string, names: string[]) {
-  return Promise.all(names.map((name) => loadImage(`${prefix}${name}.png`)));
+async function loadFrames(prefix: string, names: string[], version = "winter") {
+  return Promise.all(names.map((name) => loadImage(`${prefix}${name}.png?v=${version}`)));
 }
 
 export function MineStage() {
@@ -178,6 +178,10 @@ export function MineStage() {
       rosieGoal: 360,
       rosieMoodUntil: 0,
       rosieCheered: false,
+      rosieHopT: -1,
+      rosieHang: 0.35,
+      rosieFrom: 300,
+      rosieHopTo: 360,
       nodes: ORE_SPOTS.map((spot) => ({ ...spot, growth: 1 })),
       chunks: [] as { id: number; ore: Ore; x: number; carried: boolean }[],
       chunkSeq: 1,
@@ -397,10 +401,10 @@ export function MineStage() {
       const lanternSway = reduced ? 0 : Math.sin(time * 0.7) * 4;
       ctx.fillStyle = `rgba(240, 193, 75, ${flicker * 0.18})`;
       ctx.beginPath();
-      ctx.ellipse(168 + lanternSway, 78, 46, 28, 0, 0, Math.PI * 2);
+      ctx.ellipse(91 + lanternSway, 96, 46, 28, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.ellipse(392 - lanternSway * 0.6, 92, 36, 22, 0, 0, Math.PI * 2);
+      ctx.ellipse(364 - lanternSway * 0.6, 102, 36, 22, 0, 0, Math.PI * 2);
       ctx.fill();
 
       drawProp(state.chest, CHESTS[0]!, GROUND - 4, 28, time, 0.4);
@@ -509,26 +513,26 @@ export function MineStage() {
         }
       }
 
-      const rosieSleeping = !live && state.questT < 0 && state.rosieMood === "sleep";
-      const beside = Math.abs(state.rosieX - state.x) < 70 && Math.abs(state.rosieX - state.x) > 40;
-      const rosieSet = live && beside ? state.hopSprites : state.rosieSprites;
-      const rosie = rosieSleeping ? state.rosieSprites[0] : rosieSet[state.rosieFrame % Math.max(1, rosieSet.length)];
+      const rosieSleeping = !live && state.questT < 0 && state.rosieMood === "sleep" && state.rosieHopT < 0;
+      const arc = state.rosieHopT >= 0 ? Math.sin(Math.min(1, state.rosieHopT) * Math.PI) * 26 : 0;
+      const rosie = rosieSleeping
+        ? state.rosieSprites[0]
+        : state.rosieSprites[state.rosieFrame % Math.max(1, state.rosieSprites.length)];
       ctx.beginPath();
       ctx.fillStyle = "rgba(16, 11, 8, 0.35)";
-      ctx.ellipse(state.rosieX, GROUND + 1, 10, 3, 0, 0, Math.PI * 2);
+      ctx.ellipse(state.rosieX, GROUND + 1, 10 * (1 - (arc / 26) * 0.4), 3, 0, 0, Math.PI * 2);
       ctx.fill();
-      const rosieHop = live && beside ? Math.abs(Math.sin(time * 7)) * 6 : 0;
-      drawSprite(rosie, state.rosieX, GROUND + (rosieSleeping ? 3 : 2) - rosieHop, state.rosieFacing, PET);
+      drawSprite(rosie, state.rosieX, GROUND + (rosieSleeping ? 3 : 2) - arc, state.rosieFacing, PET);
       const carried = state.chunks.find((chunk) => chunk.carried);
       if (carried) {
         const ore = carried.ore === "ruby" ? state.ruby : state.emerald;
-        if (ore) ctx.drawImage(ore, state.rosieX - 8, GROUND - PET - 16 - rosieHop, 16, 16);
+        if (ore) ctx.drawImage(ore, state.rosieX - 8, GROUND - PET - 16 - arc, 16, 16);
       }
       if (!rosieSleeping) {
         ctx.font = "7px 'Press Start 2P', monospace";
         ctx.textAlign = "center";
         ctx.fillStyle = "#f4e6cf";
-        ctx.fillText("Rosie", Math.round(state.rosieX), Math.round(GROUND - PET - 6));
+        ctx.fillText("Rosie", Math.round(state.rosieX), Math.round(GROUND - PET - 6 - arc));
       } else {
         ctx.font = "bold 10px Nunito, sans-serif";
         ctx.textAlign = "center";
@@ -740,83 +744,88 @@ export function MineStage() {
       const payShow = Boolean(live && (live.kind === "award" || live.kind === "redeem"));
       const spot = Math.max(28, Math.min(W - 28, state.x + (state.rosieX < state.x ? -62 : 62)));
       const questingNow = state.questT >= 0;
+      const hopToward = (dest: number, dt: number) => {
+        if (state.rosieHopT >= 0) {
+          state.rosieHopT += dt / 0.46;
+          const u = Math.min(1, state.rosieHopT);
+          state.rosieX = state.rosieFrom + (state.rosieHopTo - state.rosieFrom) * u;
+          state.rosieFacing = Math.sign(state.rosieHopTo - state.rosieFrom) || state.rosieFacing;
+          state.rosieFrame = u < 0.18 ? 1 : u < 0.72 ? 2 : 3;
+          if (state.rosieHopT >= 1) {
+            state.rosieX = state.rosieHopTo;
+            state.rosieHopT = -1;
+            state.rosieHang = 0.2;
+            state.rosieFrame = 0;
+          }
+          return;
+        }
+        state.rosieFrame = 0;
+        state.rosieHang -= dt;
+        if (Math.abs(dest - state.rosieX) <= 8 || state.rosieHang > 0) return;
+        const dir = Math.sign(dest - state.rosieX) || 1;
+        const span = Math.min(Math.abs(dest - state.rosieX), 92);
+        state.rosieFacing = dir;
+        state.rosieFrom = state.rosieX;
+        state.rosieHopTo = state.rosieX + dir * span;
+        state.rosieHopT = 0;
+        state.rosieFrame = 1;
+      };
       if ((carriedChunk || (loose && !payShow)) && !(questingNow && !carriedChunk)) {
         state.rosieCheered = false;
         const goal = carriedChunk
           ? CHESTS.reduce((best, x) => (Math.abs(x - state.rosieX) < Math.abs(best - state.rosieX) ? x : best), CHESTS[0]!)
           : loose!.x;
-        const gap = goal - state.rosieX;
-        if (Math.abs(gap) > 10) {
-          const dir = Math.sign(gap) || 1;
-          state.rosieFacing = dir;
-          state.rosieX += dir * 36 * dt;
-          state.rosieT += dt;
-          if (state.rosieT > 0.16) {
-            state.rosieT = 0;
-            state.rosieFrame += 1;
+        hopToward(goal, dt);
+        if (state.rosieHopT < 0 && Math.abs(goal - state.rosieX) <= 10) {
+          if (carriedChunk) {
+            state.chunks = state.chunks.filter((chunk) => chunk.id !== carriedChunk.id);
+            burst(goal, GROUND - 24);
+            caveAudio.cue("hop");
+          } else if (loose) {
+            loose.carried = true;
           }
-        } else if (carriedChunk) {
-          state.chunks = state.chunks.filter((chunk) => chunk.id !== carriedChunk.id);
-          burst(goal, GROUND - 24);
-          caveAudio.cue("hop");
-        } else if (loose) {
-          loose.carried = true;
         }
       } else if (live || questingNow) {
         state.rosieGoal = spot;
-        const gap = state.rosieGoal - state.rosieX;
-        if (Math.abs(gap) > 4) {
-          const dir = Math.sign(gap) || 1;
-          state.rosieFacing = dir;
-          state.rosieX += dir * (live ? 42 : 28) * dt;
-          state.rosieT += dt;
-          if (state.rosieT > 0.16) {
-            state.rosieT = 0;
-            state.rosieFrame += 1;
-          }
-        } else {
+        hopToward(spot, dt);
+        if (state.rosieHopT < 0 && Math.abs(spot - state.rosieX) <= 8) {
           if (!state.rosieCheered) {
             state.rosieCheered = true;
             if (live) caveAudio.cue("hop");
           }
           state.rosieFacing = state.x > state.rosieX ? 1 : -1;
-          state.rosieT += dt;
-          if (state.rosieT > 0.14) {
-            state.rosieT = 0;
-            state.rosieFrame += 1;
-          }
         }
       } else {
         state.rosieCheered = false;
         if (Date.now() > state.rosieMoodUntil) {
-          if (state.rosieMood === "wander" && Math.random() < 0.45) {
+          if (state.rosieMood === "wander" && Math.random() < 0.12) {
             state.rosieMood = "sleep";
-            state.rosieMoodUntil = Date.now() + 5000 + Math.random() * 4000;
+            state.rosieMoodUntil = Date.now() + 2800 + Math.random() * 1200;
             caveAudio.cue("sleep");
           } else {
             state.rosieMood = "wander";
             let next = 40 + Math.random() * (W - 80);
-            for (let attempt = 0; attempt < 6 && Math.abs(next - state.x) < 90; attempt++) {
+            for (let attempt = 0; attempt < 8 && Math.abs(next - state.rosieX) < 140; attempt++) {
               next = 40 + Math.random() * (W - 80);
             }
             state.rosieGoal = next;
-            state.rosieMoodUntil = Date.now() + 7000 + Math.random() * 4000;
+            state.rosieMoodUntil = Date.now() + 9000 + Math.random() * 4000;
           }
         }
-        if (state.rosieMood === "sleep") {
+        if (state.rosieMood === "sleep" && state.rosieHopT < 0) {
           state.rosieFrame = 0;
+        } else if (state.rosieMood === "sleep") {
+          hopToward(state.rosieX, dt);
         } else {
           const gap = state.rosieGoal - state.rosieX;
-          if (Math.abs(gap) > 4) {
-            const dir = Math.sign(gap) || 1;
-            state.rosieFacing = dir;
-            state.rosieX += dir * 22 * dt;
-            state.rosieT += dt;
-            if (state.rosieT > 0.2) {
-              state.rosieT = 0;
-              state.rosieFrame += 1;
+          if (state.rosieHopT < 0 && Math.abs(gap) <= 8) {
+            let next = 40 + Math.random() * (W - 80);
+            for (let attempt = 0; attempt < 8 && Math.abs(next - state.rosieX) < 140; attempt++) {
+              next = 40 + Math.random() * (W - 80);
             }
+            state.rosieGoal = next;
           }
+          hopToward(state.rosieGoal, dt);
         }
         if (!state.tipNext) state.tipNext = Date.now() + 1800;
         if (Date.now() > state.tipNext) {
@@ -930,23 +939,23 @@ export function MineStage() {
       try {
         const [cave, walk, mine, sparks, ruby, emerald, coin, chest, greet, rosie, hop, girlWalk, girlMine, girlGreet, reward, boyPlant, girlPlantFrames] =
           await Promise.all([
-          loadImage("/art/cave.jpg"),
+          loadImage("/art/cave.jpg?v=winter"),
           loadFrames("/art/sprites/walk/walk-", ["1", "2", "3", "4"]),
-          Promise.all([1, 2, 3, 4].map((frame) => loadImage(`/art/sprites/mine/attack-${frame}.png?v=2`))),
+          Promise.all([1, 2, 3, 4].map((frame) => loadImage(`/art/sprites/mine/attack-${frame}.png?v=winter`))),
           loadFrames("/art/sprites/sparks/impact-", ["1", "2", "3", "4"]),
-          loadImage("/art/sprites/props/prop-2.png"),
-          loadImage("/art/sprites/props/prop-3.png"),
-          loadImage("/art/sprites/props/prop-1.png"),
-          loadImage("/art/sprites/props/prop-4.png"),
+          loadImage("/art/sprites/props/prop-2.png?v=winter"),
+          loadImage("/art/sprites/props/prop-3.png?v=winter"),
+          loadImage("/art/sprites/props/prop-1.png?v=winter"),
+          loadImage("/art/sprites/props/prop-4.png?v=winter"),
           loadFrames("/art/sprites/greet/idle-", ["1", "2", "3", "4"]),
-          loadFrames("/art/sprites/rosie/walk-", ["1", "2", "3", "4"]),
-          loadFrames("/art/sprites/rosie-hop/jump-", ["1", "2", "3", "4"]),
+          loadFrames("/art/sprites/rosie/walk-", ["1", "2", "3", "4"], "winter4"),
+          loadFrames("/art/sprites/rosie-hop/jump-", ["1", "2", "3", "4"], "winter4"),
           loadFrames("/art/sprites/girl-walk/walk-", ["1", "2", "3", "4"]),
           loadFrames("/art/sprites/girl-mine/attack-", ["1", "2", "3", "4"]),
           loadFrames("/art/sprites/girl-greet/idle-", ["1", "2", "3", "4"]),
           loadFrames("/art/sprites/reward/burst-", ["1", "2", "3", "4"]),
-          Promise.all([1, 2, 3, 4].map((frame) => loadImage(`/art/sprites/plant/plant-${frame}.png?v=2`))),
-          Promise.all([1, 2, 3, 4].map((frame) => loadImage(`/art/sprites/girl-plant/plant-${frame}.png?v=2`))),
+          Promise.all([1, 2, 3, 4].map((frame) => loadImage(`/art/sprites/plant/plant-${frame}.png?v=winter`))),
+          Promise.all([1, 2, 3, 4].map((frame) => loadImage(`/art/sprites/girl-plant/plant-${frame}.png?v=winter`))),
         ]);
         if (!alive) return;
         state.cave = cave;

@@ -33,7 +33,7 @@ export function AccessGate() {
 
   return (
     <main className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-8">
-      <img src="/art/cave.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <img src="/art/cave.jpg?v=winter" alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-bg-deep/80" />
       <form
         className="relative z-10 w-full max-w-md rounded-lg border-4 border-accent bg-bg/90 p-5 text-center shadow-xl"
@@ -44,13 +44,13 @@ export function AccessGate() {
       >
         <div className="flex items-end justify-center gap-2">
           <img
-            src="/art/sprites/greet/idle-1.png"
+            src="/art/sprites/greet/idle-1.png?v=winter"
             alt=""
             className="h-28 w-auto"
             style={{ imageRendering: "pixelated" }}
           />
           <img
-            src="/art/sprites/rosie/walk-1.png"
+            src="/art/sprites/rosie/walk-1.png?v=winter4"
             alt=""
             className="mb-1 h-16 w-auto"
             style={{ imageRendering: "pixelated" }}
@@ -99,7 +99,7 @@ export function PhoneLink() {
 
   return (
     <main className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-8">
-      <img src="/art/cave.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <img src="/art/cave.jpg?v=winter" alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-bg-deep/80" />
       <form
         className="relative z-10 w-full max-w-md rounded-lg border-4 border-accent bg-bg/90 p-5 text-center shadow-xl"
@@ -113,10 +113,10 @@ export function PhoneLink() {
         }}
       >
         <p className="font-pixel text-pixel text-accent">BLOCKDOJO</p>
-        <h1 className="mt-2 text-2xl font-extrabold">Phone code</h1>
-        <p className="mt-1 text-sm font-bold text-muted">Read the code on the cave TV. It changes every hour. Other phones can use the same one.</p>
+        <h1 className="mt-2 text-2xl font-extrabold">Desk code</h1>
+        <p className="mt-1 text-sm font-bold text-muted">Read the code on the cave. It changes every hour. Then enter the director pin.</p>
         <label className="mt-4 block text-left text-sm font-extrabold" htmlFor="phone-code">
-          Code on the TV
+          Code on the cave
         </label>
         <input
           id="phone-code"
@@ -137,7 +137,7 @@ export function PhoneLink() {
           disabled={busy || code.length < 4}
           className="mt-3 min-h-14 w-full rounded-md border-4 border-accent bg-accent text-lg font-extrabold text-accent-ink disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Link this phone
+          Open the desk
         </button>
         <p className="mt-2 min-h-5 text-sm font-extrabold text-primary" role="status">
           {error}

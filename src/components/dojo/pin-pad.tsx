@@ -3,7 +3,7 @@ import { useDojo } from "@/lib/dojo/store";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "C", "0", "OK"] as const;
 
-export function PinPad({ onClose }: { onClose: () => void }) {
+export function PinPad({ onClose, gate = false }: { onClose: () => void; gate?: boolean }) {
   const unlockDirector = useDojo((state) => state.unlockDirector);
   const [digits, setDigits] = useState("");
   const [error, setError] = useState("");
@@ -54,7 +54,9 @@ export function PinPad({ onClose }: { onClose: () => void }) {
         style={{ animation: shake ? "pin-shake 420ms linear" : undefined, imageRendering: "pixelated" }}
       >
         <p className="font-pixel text-pixel text-center text-accent">DIRECTOR</p>
-        <p className="mt-2 text-center text-sm font-extrabold text-muted">Shop and balance fixes need this pin.</p>
+        <p className="mt-2 text-center text-sm font-extrabold text-muted">
+          {gate ? "Enter the director pin to open the desk." : "Shop and balance fixes need this pin."}
+        </p>
         <div className="mt-4 grid grid-cols-6 gap-1" aria-label="Pin entry">
           {Array.from({ length: 6 }, (_, index) => (
             <span
@@ -84,9 +86,11 @@ export function PinPad({ onClose }: { onClose: () => void }) {
         <p className="mt-3 min-h-5 text-center text-sm font-extrabold text-primary" role="status">
           {error}
         </p>
-        <button type="button" onClick={onClose} className="mt-1 min-h-11 w-full border-2 border-border font-extrabold">
-          Close
-        </button>
+        {gate ? null : (
+          <button type="button" onClick={onClose} className="mt-1 min-h-11 w-full border-2 border-border font-extrabold">
+            Close
+          </button>
+        )}
       </div>
     </dialog>
   );

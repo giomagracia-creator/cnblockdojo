@@ -22,6 +22,7 @@ import {
   promoteBeltFn,
   dismissCeremonyFn,
   dayLedgerFn,
+  playStoryFn,
 } from "@/lib/dojo/api";
 import { caveAudio } from "@/lib/dojo/audio";
 import { gateOpen } from "@/lib/dojo/gate";
@@ -52,6 +53,7 @@ type DojoStore = {
   phoneCode: string;
   phoneHour: string;
   phoneUntil: string;
+  storyAt: number;
   phoneLocked: boolean;
   directorUntil: number;
   directorToken: string;
@@ -85,6 +87,7 @@ type DojoStore = {
   linkPhone: (phone: string) => Promise<RedeemResult>;
   dismissCeremony: (ceremonyId: string) => Promise<RedeemResult>;
   dayLedger: (timeZone: string) => Promise<{ ok: true; filename: string; file: string } | { ok: false; reason: string }>;
+  playStory: () => Promise<RedeemResult>;
 };
 
 let epoch = 0;
@@ -153,8 +156,17 @@ function timeZone() {
   }
 }
 
+let deskToken = "";
+
 function pass() {
-  return { phone: readPhone(), zone: timeZone() };
+  return { phone: readPhone(), zone: timeZone(), token: deskToken };
+}
+
+function dropDesk(result: { ok: boolean; reason?: string }) {
+  if (!result.ok && result.reason === "The desk is locked. Enter the pin.") {
+    deskToken = "";
+    useDojo.setState({ directorToken: "", directorUntil: 0 });
+  }
 }
 
 function applySnapshot(snapshot: DojoSnapshot) {
@@ -183,6 +195,7 @@ function applySnapshot(snapshot: DojoSnapshot) {
     phoneCode: snapshot.phoneCode ?? "",
     phoneHour: snapshot.phoneHour ?? "",
     phoneUntil: snapshot.phoneUntil ?? "",
+    storyAt: snapshot.storyAt ?? 0,
     hydrated: true,
   });
 }
@@ -190,7 +203,9 @@ function applySnapshot(snapshot: DojoSnapshot) {
 async function run<T extends { ok: boolean }>(task: () => Promise<T>): Promise<T> {
   epoch += 1;
   try {
-    return await task();
+    const result = await task();
+    dropDesk(result);
+    return result;
   } finally {
     epoch += 1;
   }
@@ -215,10 +230,14 @@ export const useDojo = create<DojoStore>()((set, get) => ({
   phoneCode: "",
   phoneHour: "",
   phoneUntil: "",
+  storyAt: 0,
   phoneLocked: false,
   directorUntil: 0,
   directorToken: "",
-  lockDirector: () => set({ directorUntil: 0, directorToken: "" }),
+  lockDirector: () => {
+    deskToken = "";
+    set({ directorUntil: 0, directorToken: "" });
+  },
   refresh: async (role) => {
     if (!gateOpen()) {
       set({ hydrated: true });
@@ -238,12 +257,20 @@ export const useDojo = create<DojoStore>()((set, get) => ({
         if (seen !== epoch) return;
         if (!result.ok) {
           if (result.phone) clearPhone();
-          set({ hydrated: true, phoneLocked: role === "sensei" && Boolean(result.phone), code: role === "sensei" ? CENTER_CODE : null });
+          set({
+            hydrated: true,
+            phoneLocked: role === "sensei" && Boolean(result.phone),
+            code: role === "sensei" ? CENTER_CODE : null,
+            directorToken: "",
+            directorUntil: 0,
+          });
+          deskToken = "";
           return;
         }
         writeCode(result.code);
         if (role === "sensei") writePhone(phone, result.snapshot.phoneHour);
         set({ code: result.code, directorToken: "", directorUntil: 0, phoneLocked: false });
+        deskToken = "";
         applySnapshot(result.snapshot);
       } catch {
         if (seen === epoch) set({ hydrated: true });
@@ -258,7 +285,8 @@ export const useDojo = create<DojoStore>()((set, get) => ({
       if (!result.ok) {
         if (result.phone) {
           clearPhone();
-          set({ hydrated: true, phoneLocked: true, code: saved });
+          set({ hydrated: true, phoneLocked: true, code: saved, directorToken: "", directorUntil: 0 });
+          deskToken = "";
           return;
         }
         writeCode(null);
@@ -278,6 +306,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
       const result = await run(() => openDojoFn({ data: { role, ...pass() } }));
       if (!result.ok) return result;
       writeCode(result.code);
+      deskToken = "";
       set({ code: result.code, directorToken: "", directorUntil: 0 });
       applySnapshot(result.snapshot);
       return { ok: true };
@@ -290,6 +319,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
       const result = await run(() => joinDojoFn({ data: { role, code, ...pass() } }));
       if (!result.ok) return result;
       writeCode(result.code);
+      deskToken = "";
       set({ code: result.code, directorToken: "", directorUntil: 0 });
       applySnapshot(result.snapshot);
       return { ok: true };
@@ -300,6 +330,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
   leaveDojo: () => {
     epoch += 1;
     writeCode(null);
+    deskToken = "";
     seenEvent = "";
     dismissedCeremony = "";
     set({
@@ -325,6 +356,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     try {
       const result = await unlockDirectorFn({ data: { code, pin, ...pass() } });
       if (!result.ok) return { ok: false, reason: result.reason };
+      deskToken = result.token;
       set({ directorToken: result.token, directorUntil: result.until });
       return { ok: true };
     } catch {
@@ -368,7 +400,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return { ok: false, reason: "The cave isn't open yet." };
     try {
-      const result = await run(() => addStudentFn({ data: { code, input, token: get().directorToken, ...pass() } }));
+      const result = await run(() => addStudentFn({ data: { code, input, ...pass() } }));
       if (!result.ok) return result;
       applySnapshot(result.snapshot);
       return { ok: true, id: result.id };
@@ -380,7 +412,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return { ok: false, reason: "Join a dojo first." };
     try {
-      const result = await run(() => updateStudentFn({ data: { code, studentId, patch, token: get().directorToken, ...pass() } }));
+      const result = await run(() => updateStudentFn({ data: { code, studentId, patch, ...pass() } }));
       if (result.ok) applySnapshot(result.snapshot);
       return result.ok ? { ok: true } : result;
     } catch {
@@ -391,7 +423,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return "";
     try {
-      const result = await run(() => addItemFn({ data: { code, input, token: get().directorToken, ...pass() } }));
+      const result = await run(() => addItemFn({ data: { code, input, ...pass() } }));
       if (!result.ok) return "";
       applySnapshot(result.snapshot);
       return result.id;
@@ -403,7 +435,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return { ok: false, reason: "Join a dojo first." };
     try {
-      const result = await run(() => updateItemFn({ data: { code, itemId, patch, token: get().directorToken, ...pass() } }));
+      const result = await run(() => updateItemFn({ data: { code, itemId, patch, ...pass() } }));
       if (result.ok) applySnapshot(result.snapshot);
       return result.ok ? { ok: true } : result;
     } catch {
@@ -414,7 +446,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return { ok: false, reason: "Join a dojo first." };
     try {
-      const result = await run(() => removeItemFn({ data: { code, itemId, token: get().directorToken, ...pass() } }));
+      const result = await run(() => removeItemFn({ data: { code, itemId, ...pass() } }));
       if (result.ok) applySnapshot(result.snapshot);
       return result.ok ? { ok: true } : result;
     } catch {
@@ -425,7 +457,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return { ok: false, reason: "Join a dojo first." };
     try {
-      const result = await run(() => restoreDemoFn({ data: { code, token: get().directorToken, ...pass() } }));
+      const result = await run(() => restoreDemoFn({ data: { code, ...pass() } }));
       if (result.ok) applySnapshot(result.snapshot);
       return result.ok ? { ok: true } : result;
     } catch {
@@ -469,7 +501,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return "";
     try {
-      const result = await run(() => addAchievementFn({ data: { code, input, token: get().directorToken, ...pass() } }));
+      const result = await run(() => addAchievementFn({ data: { code, input, ...pass() } }));
       if (!result.ok) return "";
       applySnapshot(result.snapshot);
       return result.id;
@@ -481,7 +513,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return { ok: false, reason: "Join a dojo first." };
     try {
-      const result = await run(() => updateAchievementFn({ data: { code, achievementId, patch, token: get().directorToken, ...pass() } }));
+      const result = await run(() => updateAchievementFn({ data: { code, achievementId, patch, ...pass() } }));
       if (result.ok) applySnapshot(result.snapshot);
       return result.ok ? { ok: true } : result;
     } catch {
@@ -492,7 +524,7 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     const code = get().code;
     if (!code) return { ok: false, reason: "Join a dojo first." };
     try {
-      const result = await run(() => removeAchievementFn({ data: { code, achievementId, token: get().directorToken, ...pass() } }));
+      const result = await run(() => removeAchievementFn({ data: { code, achievementId, ...pass() } }));
       if (result.ok) applySnapshot(result.snapshot);
       return result.ok ? { ok: true } : result;
     } catch {
@@ -551,11 +583,25 @@ export const useDojo = create<DojoStore>()((set, get) => ({
     if (!code) return { ok: false, reason: "Join a dojo first." };
     try {
       const result = await dayLedgerFn({ data: { code, timeZone, ...pass() } });
-      if (!result.ok) return result;
+      if (!result.ok) {
+        dropDesk(result);
+        return result;
+      }
       applySnapshot(result.snapshot);
       return { ok: true, filename: result.filename, file: result.file };
     } catch {
       return { ok: false, reason: "The day file didn't export. Try again." };
+    }
+  },
+  playStory: async () => {
+    const code = get().code;
+    if (!code) return { ok: false, reason: "Join a dojo first." };
+    try {
+      const result = await run(() => playStoryFn({ data: { code, ...pass() } }));
+      if (result.ok) applySnapshot(result.snapshot);
+      return result.ok ? { ok: true } : result;
+    } catch {
+      return { ok: false, reason: "The cave didn't start the story. Try again." };
     }
   },
 }));

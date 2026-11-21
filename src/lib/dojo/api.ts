@@ -8,6 +8,10 @@ function zoneOf(data: Record<string, unknown>) {
   return String(data.zone ?? "");
 }
 
+function tokenOf(data: Record<string, unknown>) {
+  return String(data.token ?? "");
+}
+
 function payload(input: unknown) {
   if (!input || typeof input !== "object") return {} as Record<string, unknown>;
   return input as Record<string, unknown>;
@@ -48,21 +52,21 @@ export const awardCoinsFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { awardCoins } = await import("@/lib/dojo/dojo.server");
-    return awardCoins(String(data.code ?? ""), String(data.studentId ?? ""), Number(data.amount), phoneOf(data));
+    return awardCoins(String(data.code ?? ""), String(data.studentId ?? ""), Number(data.amount), phoneOf(data), tokenOf(data));
   });
 
 export const callPocketFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { callPocket } = await import("@/lib/dojo/dojo.server");
-    return callPocket(String(data.code ?? ""), String(data.studentId ?? ""), phoneOf(data));
+    return callPocket(String(data.code ?? ""), String(data.studentId ?? ""), phoneOf(data), tokenOf(data));
   });
 
 export const redeemItemFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { redeemItem } = await import("@/lib/dojo/dojo.server");
-    return redeemItem(String(data.code ?? ""), String(data.studentId ?? ""), String(data.itemId ?? ""), phoneOf(data));
+    return redeemItem(String(data.code ?? ""), String(data.studentId ?? ""), String(data.itemId ?? ""), phoneOf(data), tokenOf(data));
   });
 
 export const addStudentFn = createServerFn({ method: "POST" })
@@ -143,21 +147,21 @@ export const setHeroFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { setHero } = await import("@/lib/dojo/dojo.server");
-    return setHero(String(data.code ?? ""), String(data.hero ?? "boy"), phoneOf(data));
+    return setHero(String(data.code ?? ""), String(data.hero ?? "boy"), phoneOf(data), tokenOf(data));
   });
 
 export const undoLastFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { undoLast } = await import("@/lib/dojo/dojo.server");
-    return undoLast(String(data.code ?? ""), phoneOf(data));
+    return undoLast(String(data.code ?? ""), phoneOf(data), tokenOf(data));
   });
 
 export const claimAchievementFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { claimAchievement } = await import("@/lib/dojo/dojo.server");
-    return claimAchievement(String(data.code ?? ""), String(data.studentId ?? ""), String(data.achievementId ?? ""), phoneOf(data));
+    return claimAchievement(String(data.code ?? ""), String(data.studentId ?? ""), String(data.achievementId ?? ""), phoneOf(data), tokenOf(data));
   });
 
 export const addAchievementFn = createServerFn({ method: "POST" })
@@ -197,7 +201,7 @@ export const promoteBeltFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { promoteBelt } = await import("@/lib/dojo/dojo.server");
-    return promoteBelt(String(data.code ?? ""), String(data.studentId ?? ""), phoneOf(data));
+    return promoteBelt(String(data.code ?? ""), String(data.studentId ?? ""), phoneOf(data), tokenOf(data));
   });
 
 export const dismissCeremonyFn = createServerFn({ method: "POST" })
@@ -211,6 +215,13 @@ export const dayLedgerFn = createServerFn({ method: "POST" })
   .validator(payload)
   .handler(async ({ data }) => {
     const { dayLedger } = await import("@/lib/dojo/dojo.server");
-    return dayLedger(String(data.code ?? ""), String(data.timeZone ?? ""), phoneOf(data));
+    return dayLedger(String(data.code ?? ""), String(data.timeZone ?? ""), phoneOf(data), tokenOf(data));
+  });
+
+export const playStoryFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { playStory } = await import("@/lib/dojo/dojo.server");
+    return playStory(String(data.code ?? ""), phoneOf(data), tokenOf(data));
   });
 

@@ -97,6 +97,7 @@ export type DojoSnapshot = {
   phoneCode: string;
   phoneHour: string;
   phoneUntil: string;
+  storyAt: number;
 };
 
 export type BeltCeremony = {
@@ -133,5 +134,6 @@ export function nextBelt(belt: Belt): Belt | null {
 }
 
 export function beltClip(belt: Belt) {
-  return `/art/belts/${belt.toLowerCase()}.mp4`;
+  const version = belt === "Yellow" ? "2" : "1";
+  return `/art/belts/${belt.toLowerCase()}.mp4?v=${version}`;
 }

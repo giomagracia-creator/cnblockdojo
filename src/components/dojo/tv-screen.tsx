@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DojoLoading } from "@/components/dojo/join-screen";
 import { AccessGate, useDoor } from "@/components/dojo/access-gate";
@@ -86,6 +85,149 @@ function BeltShow({ ceremony }: { ceremony: BeltCeremony }) {
           loop
           playsInline
           preload="auto"
+          onError={() => setFailed(true)}
+        />
+      )}
+    </div>
+  );
+}
+
+const STORY_SRC = "/art/story.mp4?v=1";
+const STORY_GAP = 30 * 60 * 1000;
+const STORY_OPEN = 20_000;
+const STORY_FRESH = 90_000;
+const STORY_SEEN = "blockdojo-story-seen";
+const STORY_PLAYED = "blockdojo-story-played";
+
+function useCaveStory(active: boolean, boardOpen: boolean) {
+  const storyAt = useDojo((state) => state.storyAt);
+  const ceremony = useDojo((state) => state.ceremony);
+  const [playing, setPlaying] = useState(false);
+  const nextAt = useRef(0);
+  const pending = useRef(false);
+  const seen = useRef(0);
+  const booted = useRef(false);
+
+  useEffect(() => {
+    if (!active || booted.current) return;
+    booted.current = true;
+    let played = 0;
+    let known = 0;
+    try {
+      played = Number(sessionStorage.getItem(STORY_PLAYED) || 0);
+      known = Number(sessionStorage.getItem(STORY_SEEN) || 0);
+    } catch {
+      /* private mode */
+    }
+    seen.current = known;
+    nextAt.current = played > 0 ? played + STORY_GAP : Date.now() + STORY_OPEN;
+  }, [active]);
+
+  useEffect(() => {
+    if (!storyAt || storyAt <= seen.current) return;
+    seen.current = storyAt;
+    try {
+      sessionStorage.setItem(STORY_SEEN, String(storyAt));
+    } catch {
+      /* private mode */
+    }
+    if (Date.now() - storyAt < STORY_FRESH) pending.current = true;
+  }, [storyAt]);
+
+  useEffect(() => {
+    if (ceremony && playing) setPlaying(false);
+  }, [ceremony, playing]);
+
+  useEffect(() => {
+    if (!active) return;
+    const timer = window.setInterval(() => {
+      if (playing) return;
+      const live = useDojo.getState();
+      if (live.ceremony) return;
+      if (live.events.some((event) => event.sceneUntil > Date.now())) return;
+      const manual = pending.current;
+      if (!manual && (Date.now() < nextAt.current || boardOpen)) return;
+      pending.current = false;
+      const now = Date.now();
+      nextAt.current = now + STORY_GAP;
+      try {
+        sessionStorage.setItem(STORY_PLAYED, String(now));
+      } catch {
+        /* private mode */
+      }
+      setPlaying(true);
+    }, 400);
+    return () => window.clearInterval(timer);
+  }, [active, boardOpen, playing]);
+
+  const stop = useRef(() => setPlaying(false)).current;
+  return { show: playing && !ceremony, stop };
+}
+
+function CaveStory({ onDone }: { onDone: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    caveAudio.armMusic(false);
+    const video = videoRef.current;
+    let armed = false;
+    const armTimer = window.setTimeout(() => {
+      armed = true;
+    }, 400);
+    const dismiss = (event: Event) => {
+      if (!armed) return;
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-sound-toggle]")) return;
+      onDone();
+    };
+    window.addEventListener("pointerdown", dismiss, true);
+    window.addEventListener("keydown", dismiss, true);
+    const syncMute = () => {
+      if (video) video.muted = caveAudio.snapshot() === "off";
+    };
+    syncMute();
+    const unsub = caveAudio.subscribe(syncMute);
+    const start = async () => {
+      if (!video) return;
+      syncMute();
+      try {
+        await video.play();
+      } catch {
+        video.muted = true;
+        try {
+          await video.play();
+        } catch {
+          /* autoplay still blocked */
+        }
+      }
+    };
+    void start();
+    return () => {
+      window.clearTimeout(armTimer);
+      window.removeEventListener("pointerdown", dismiss, true);
+      window.removeEventListener("keydown", dismiss, true);
+      unsub();
+      caveAudio.armMusic(true);
+    };
+  }, [onDone]);
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black" role="dialog" aria-modal="true" aria-label="Block Dojo story">
+      {failed ? (
+        <div className="px-6 text-center">
+          <p className="text-xl font-extrabold text-fg">Welcome to the Block Dojo.</p>
+          <p className="mt-2 text-sm font-bold text-white/70">Tap to return to the mine.</p>
+        </div>
+      ) : (
+        <video
+          ref={videoRef}
+          src={STORY_SRC}
+          className="h-full w-full object-contain"
+          autoPlay
+          playsInline
+          preload="auto"
+          onEnded={onDone}
           onError={() => setFailed(true)}
         />
       )}
@@ -334,7 +476,6 @@ export function TvScreen() {
   const hydrated = useDojo((state) => state.hydrated);
   const code = useDojo((state) => state.code);
   const vault = useDojo((state) => state.vault);
-  const senseiSeen = useDojo((state) => state.senseiSeen);
   const ceremony = useDojo((state) => state.ceremony);
   const phoneCode = useDojo((state) => state.phoneCode);
   const phoneUntil = useDojo((state) => state.phoneUntil);
@@ -342,6 +483,8 @@ export function TvScreen() {
   const [minersOpen, setMinersOpen] = useState(false);
   const [expOpen, setExpOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const caveOpen = door === "open" && hydrated && Boolean(code);
+  const story = useCaveStory(caveOpen, expOpen || shopOpen);
   const active = students.filter((student) => !student.archived);
   const leaders = [...active].sort((a, b) => b.coins - a.coins || displayName(a).localeCompare(displayName(b))).slice(0, 4);
   const feed = events.filter((event) => event.kind !== "pocket").slice(0, 8);
@@ -375,19 +518,11 @@ export function TvScreen() {
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:order-3">
             <SoundToggle />
-            <Link
-              to="/sensei"
-              className={`inline-flex min-h-11 items-center rounded-md border-2 border-border bg-bg/85 px-3 font-extrabold text-fg shadow-lg ${
-                senseiSeen ? "lg:hidden" : ""
-              }`}
-            >
-              Desk
-            </Link>
           </div>
         </div>
         <div className="rounded-md border-4 border-accent bg-bg/95 px-3 py-1 text-center shadow-lg sm:order-2 sm:px-4 sm:py-1.5">
           <p className="text-[10px] font-extrabold tracking-wide text-muted uppercase">
-            Phone code{phoneUntil ? ` · until ${phoneUntil}` : ""}
+            Desk code{phoneUntil ? ` · until ${phoneUntil}` : ""}
           </p>
           <p className="font-mono text-3xl font-black tracking-[0.28em] text-accent sm:text-4xl">{phoneCode || "····"}</p>
         </div>
@@ -498,6 +633,7 @@ export function TvScreen() {
         <p className="truncate font-extrabold sm:hidden">{feed[0] ? eventLine(feed[0]) : "Waiting for the first payout."}</p>
       </div>
       {ceremony ? <BeltShow key={ceremony.id} ceremony={ceremony} /> : null}
+      {story.show ? <CaveStory onDone={story.stop} /> : null}
     </main>
   );
 }

@@ -61,6 +61,7 @@ type DojoRow = {
   phone_code?: string | null;
   phone_hour?: string | null;
   phone_zone?: string | null;
+  story_at?: number | string | null;
 };
 
 type StudentRow = {
@@ -194,7 +195,7 @@ async function findDojo(sql: Sql, code: string) {
   const normalized = normalizeCode(code);
   if (!normalized) return null;
   const rows = await sql<DojoRow>`
-    select id, week_started, display_seen, sensei_seen, last_redeem_at, director_token_hash, director_until, pin_fails, pin_lock_until, hero, vault, ceremony_id, ceremony_name, ceremony_belt, phone_code, phone_hour, phone_zone
+    select id, week_started, display_seen, sensei_seen, last_redeem_at, director_token_hash, director_until, pin_fails, pin_lock_until, hero, vault, ceremony_id, ceremony_name, ceremony_belt, phone_code, phone_hour, phone_zone, story_at
     from dojos where code_hash = ${hashSecret(normalized)}
   `;
   return rows[0] ?? null;
@@ -265,7 +266,7 @@ async function tickMine(sql: Sql, dojoId: string) {
 
 async function snapshot(sql: Sql, dojoId: string, role: DojoRole = "sensei", zone?: string): Promise<DojoSnapshot> {
   const dojos = await sql<DojoRow>`
-    select id, week_started, display_seen, sensei_seen, last_redeem_at, director_token_hash, director_until, pin_fails, pin_lock_until, hero, vault, ceremony_id, ceremony_name, ceremony_belt, phone_code, phone_hour, phone_zone
+    select id, week_started, display_seen, sensei_seen, last_redeem_at, director_token_hash, director_until, pin_fails, pin_lock_until, hero, vault, ceremony_id, ceremony_name, ceremony_belt, phone_code, phone_hour, phone_zone, story_at
     from dojos where id = ${dojoId}
   `;
   const dojo = dojos[0];
@@ -337,6 +338,7 @@ async function snapshot(sql: Sql, dojoId: string, role: DojoRole = "sensei", zon
     phoneCode: role === "display" ? pass.code : "",
     phoneHour: pass.hour,
     phoneUntil: pass.until,
+    storyAt: num(dojo.story_at),
   };
 }
 
@@ -381,8 +383,8 @@ async function pushUndo(
   `;
 }
 
-export async function undoLast(code: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+export async function undoLast(code: string, phone = "", token = ""): Promise<SnapOk | Fail> {
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const { sql, dojo } = linked;
   const rows = await sql<{
@@ -481,8 +483,8 @@ function asHero(value: string): Hero {
   return value === "girl" ? "girl" : "boy";
 }
 
-export async function setHero(code: string, hero: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+export async function setHero(code: string, hero: string, phone = "", token = ""): Promise<SnapOk | Fail> {
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const next = asHero(hero);
   await linked.sql`update dojos set hero = ${next} where id = ${linked.dojo.id}`;
@@ -630,10 +632,19 @@ async function connected(code: string, role: DojoRole, phone?: string, zone?: st
   if (!dojo) return { ok: false as const, reason: "That code doesn't match a dojo." };
   const pass = await ensurePhoneCode(sql, dojo, role === "display" ? zone : undefined);
   if (role === "sensei" && normalizePhone(phone) !== pass.code) {
-    return { ok: false as const, reason: "Read the phone code on the cave.", phone: true as const };
+    return { ok: false as const, reason: "Read the desk code on the cave.", phone: true as const };
   }
   await markSeen(sql, dojo.id, role);
   return { ok: true as const, sql, dojo, snapshot: await snapshot(sql, dojo.id, role, role === "display" ? zone : undefined) };
+}
+
+async function openedDesk(code: string, phone = "", token?: string) {
+  const linked = await connected(code, "sensei", phone);
+  if (!linked.ok) return linked;
+  if (!(await directorOk(linked.sql, linked.dojo, token))) {
+    return { ok: false as const, reason: "The desk is locked. Enter the pin." };
+  }
+  return linked;
 }
 
 export async function openDojo(role: DojoRole, zone?: string, phone?: string) {
@@ -669,7 +680,7 @@ export async function openDojo(role: DojoRole, zone?: string, phone?: string) {
   if (role === "sensei") {
     const pass = await ensurePhoneCode(sql, dojo);
     if (normalizePhone(phone) !== pass.code) {
-      return { ok: false as const, reason: "Read the phone code on the cave.", phone: true as const };
+      return { ok: false as const, reason: "Read the desk code on the cave.", phone: true as const };
     }
   }
   await markSeen(sql, dojo.id, role);
@@ -719,11 +730,11 @@ export async function unlockDirector(code: string, pin: string, phone = "") {
   return { ok: true as const, token, until };
 }
 
-export async function awardCoins(code: string, studentId: string, amount: number, phone = ""): Promise<SnapOk | Fail> {
+export async function awardCoins(code: string, studentId: string, amount: number, phone = "", token = ""): Promise<SnapOk | Fail> {
   const gain = Math.floor(amount);
   if (!Number.isFinite(gain) || gain <= 0) return { ok: false, reason: "Enter a coin amount." };
   if (gain > PAYOUT_MAX) return { ok: false, reason: `Payouts stop at ${PAYOUT_MAX} coins.` };
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const { sql, dojo } = linked;
   const rows = await sql<StudentRow>`
@@ -790,8 +801,8 @@ export async function awardCoins(code: string, studentId: string, amount: number
   return { ok: true, snapshot: await snapshot(sql, dojo.id) };
 }
 
-export async function callPocket(code: string, studentId: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+export async function callPocket(code: string, studentId: string, phone = "", token = ""): Promise<SnapOk | Fail> {
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const { sql, dojo } = linked;
   const rows = await sql<StudentRow>`
@@ -813,8 +824,16 @@ export async function callPocket(code: string, studentId: string, phone = ""): P
   return { ok: true, snapshot: await snapshot(sql, dojo.id) };
 }
 
-export async function redeemItem(code: string, studentId: string, itemId: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+export async function playStory(code: string, phone = "", token = ""): Promise<SnapOk | Fail> {
+  const linked = await openedDesk(code, phone, token);
+  if (!linked.ok) return linked;
+  const now = Date.now();
+  await linked.sql`update dojos set story_at = ${now} where id = ${linked.dojo.id}`;
+  return { ok: true, snapshot: await snapshot(linked.sql, linked.dojo.id, "sensei") };
+}
+
+export async function redeemItem(code: string, studentId: string, itemId: string, phone = "", token = ""): Promise<SnapOk | Fail> {
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const { sql, dojo } = linked;
   const students = await sql<StudentRow>`
@@ -946,8 +965,8 @@ export async function redeemItem(code: string, studentId: string, itemId: string
   return { ok: true, snapshot: await snapshot(sql, dojo.id) };
 }
 
-export async function claimAchievement(code: string, studentId: string, achievementId: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+export async function claimAchievement(code: string, studentId: string, achievementId: string, phone = "", token = ""): Promise<SnapOk | Fail> {
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const { sql, dojo } = linked;
   const students = await sql<StudentRow>`
@@ -1029,7 +1048,7 @@ export async function addAchievement(
   token: string,
   phone = "",
 ): Promise<{ ok: true; id: string; snapshot: DojoSnapshot } | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   if (!(await directorOk(linked.sql, linked.dojo, token))) return { ok: false, reason: "The director pin is required." };
   const next = cleanAchievement(input);
@@ -1049,7 +1068,7 @@ export async function updateAchievement(
   token: string,
   phone = "",
 ): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   if (!(await directorOk(linked.sql, linked.dojo, token))) return { ok: false, reason: "The director pin is required." };
   const rows = await linked.sql<{ id: string; cadence: string; name: string; coins: number | string; image: string }>`
@@ -1072,7 +1091,7 @@ export async function updateAchievement(
 }
 
 export async function removeAchievement(code: string, achievementId: string, token: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   if (!(await directorOk(linked.sql, linked.dojo, token))) return { ok: false, reason: "The director pin is required." };
   await linked.sql`delete from achievement_claims where achievement_id = ${achievementId} and dojo_id = ${linked.dojo.id}`;
@@ -1091,7 +1110,7 @@ export async function addStudent(
   if (firstName.length < 1) return { ok: false, reason: "First name is required." };
   if (!/^[A-Z]$/.test(lastInitial)) return { ok: false, reason: "Use a single last initial." };
   if (!isBelt(input.belt)) return { ok: false, reason: "Pick a belt." };
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const taken = await findNamed(linked.sql, linked.dojo.id, firstName, lastInitial);
   if (taken) return { ok: false, reason: nameBlockReason(taken.first_name, taken.last_initial, flag(taken.archived)) };
@@ -1152,7 +1171,7 @@ export async function updateStudent(
   token?: string,
   phone = "",
 ): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const rows = await linked.sql<StudentRow>`
     select id, first_name, last_initial, belt, coins, exp, week_coins, archived, day_key, day_coins, last_award_at
@@ -1206,8 +1225,8 @@ export async function updateStudent(
   return { ok: true, snapshot: await snapshot(linked.sql, linked.dojo.id) };
 }
 
-export async function promoteBelt(code: string, studentId: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+export async function promoteBelt(code: string, studentId: string, phone = "", token = ""): Promise<SnapOk | Fail> {
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const rows = await linked.sql<StudentRow>`
     select id, first_name, last_initial, belt, coins, exp, week_coins, archived, day_key, day_coins, last_award_at
@@ -1278,7 +1297,7 @@ export async function addItem(
   token: string,
   phone = "",
 ): Promise<{ ok: true; id: string; snapshot: DojoSnapshot } | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   if (!(await directorOk(linked.sql, linked.dojo, token))) return { ok: false, reason: "The director pin is required." };
   const item = cleanItem(input);
@@ -1300,7 +1319,7 @@ export async function updateItem(
   token: string,
   phone = "",
 ): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   if (!(await directorOk(linked.sql, linked.dojo, token))) return { ok: false, reason: "The director pin is required." };
   const rows = await linked.sql<ItemRow>`select id, name, price, currency, stock, image, min_belt from shop_items where id = ${itemId} and dojo_id = ${linked.dojo.id}`;
@@ -1323,7 +1342,7 @@ export async function updateItem(
 }
 
 export async function removeItem(code: string, itemId: string, token: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   if (!(await directorOk(linked.sql, linked.dojo, token))) return { ok: false, reason: "The director pin is required." };
   const rows = await linked.sql<ItemRow>`select id, name, price, currency, stock, image, min_belt from shop_items where id = ${itemId} and dojo_id = ${linked.dojo.id}`;
@@ -1340,7 +1359,7 @@ export async function removeItem(code: string, itemId: string, token: string, ph
 }
 
 export async function restoreDemo(code: string, token: string, phone = ""): Promise<SnapOk | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   if (!(await directorOk(linked.sql, linked.dojo, token))) return { ok: false, reason: "The director pin is required." };
   const now = Date.now();
@@ -1440,8 +1459,9 @@ export async function dayLedger(
   code: string,
   timeZone: string,
   phone = "",
+  token = "",
 ): Promise<{ ok: true; filename: string; file: string; snapshot: DojoSnapshot } | Fail> {
-  const linked = await connected(code, "sensei", phone);
+  const linked = await openedDesk(code, phone, token);
   if (!linked.ok) return linked;
   const zone = cleanZone(timeZone);
   const now = Date.now();
