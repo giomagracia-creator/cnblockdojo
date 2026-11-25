@@ -97,6 +97,7 @@ export const updateStudentFn = createServerFn({ method: "POST" })
       belt?: string;
       coins?: number;
       archived?: boolean;
+      visitHours?: number;
     };
     return updateStudent(String(data.code ?? ""), String(data.studentId ?? ""), patch, data.token ? String(data.token) : undefined, phoneOf(data));
   });
@@ -223,5 +224,75 @@ export const playStoryFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { playStory } = await import("@/lib/dojo/dojo.server");
     return playStory(String(data.code ?? ""), phoneOf(data), tokenOf(data));
+  });
+
+export const ninjaRosterFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaRoster } = await import("@/lib/dojo/games.server");
+    return ninjaRoster(phoneOf(data));
+  });
+
+export const ninjaBoardFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaBoard } = await import("@/lib/dojo/games.server");
+    return ninjaBoard(phoneOf(data), String(data.studentId ?? ""));
+  });
+
+export const ninjaStartFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaStart } = await import("@/lib/dojo/games.server");
+    return ninjaStart(phoneOf(data), String(data.studentId ?? ""), String(data.game ?? ""));
+  });
+
+export const ninjaFinishFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaFinish } = await import("@/lib/dojo/games.server");
+    return ninjaFinish(phoneOf(data), String(data.studentId ?? ""), String(data.runId ?? ""), Number(data.words), Number(data.golden), Boolean(data.lost));
+  });
+
+export const ninjaQueueReadyFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaQueueReady } = await import("@/lib/dojo/fight.server");
+    return ninjaQueueReady(phoneOf(data), String(data.studentId ?? ""));
+  });
+
+export const ninjaQueuePollFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaQueuePoll } = await import("@/lib/dojo/fight.server");
+    return ninjaQueuePoll(phoneOf(data), String(data.studentId ?? ""), String(data.queueId ?? ""));
+  });
+
+export const ninjaQueueLockFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaQueueLock } = await import("@/lib/dojo/fight.server");
+    return ninjaQueueLock(phoneOf(data), String(data.studentId ?? ""), String(data.queueId ?? ""), String(data.fighter ?? ""));
+  });
+
+export const ninjaQueueCloseFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaQueueClose } = await import("@/lib/dojo/fight.server");
+    return ninjaQueueClose(phoneOf(data), String(data.studentId ?? ""), String(data.queueId ?? ""));
+  });
+
+export const ninjaMatchStateFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaMatchState } = await import("@/lib/dojo/fight.server");
+    return ninjaMatchState(phoneOf(data), String(data.studentId ?? ""), String(data.matchId ?? ""));
+  });
+
+export const ninjaMatchTypeFn = createServerFn({ method: "POST" })
+  .validator(payload)
+  .handler(async ({ data }) => {
+    const { ninjaMatchType } = await import("@/lib/dojo/fight.server");
+    return ninjaMatchType(phoneOf(data), String(data.studentId ?? ""), String(data.matchId ?? ""), String(data.letter ?? ""));
   });
 

@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/ninja",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Ninja games · BLOCKDOJO",
+      "hasCanvas": false,
+      "bodyTextLen": 66,
+      "bodyTextHash": "e97253f5696c767490177b8c5693f46681f542c305720af768ed77ead65225ab",
+      "bodyTextPrefix": "BLOCKDOJO Ninja games Read the 4-character code on the cave. Ent",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/live-check.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Ninja games · BLOCKDOJO",
+      "hasCanvas": false,
+      "bodyTextLen": 66,
+      "bodyTextHash": "e97253f5696c767490177b8c5693f46681f542c305720af768ed77ead65225ab",
+      "bodyTextPrefix": "BLOCKDOJO Ninja games Read the 4-character code on the cave. Ent",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/live-check-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/live-check.json"
+}

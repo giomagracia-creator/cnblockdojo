@@ -451,6 +451,32 @@ export function SenseiDesk() {
               <p className="mt-1 text-xs font-bold text-muted">
                 {earnedToday(selected)}/{DAILY_MAX} earned today · {PAYOUT_MAX} max each payout
               </p>
+              <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Visit length">
+                {[1, 2].map((hours) => {
+                  const on = (selected.visitHours ?? 1) === hours;
+                  return (
+                    <button
+                      key={hours}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => {
+                        if (!selected || on) return;
+                        void updateStudent(selected.id, { visitHours: hours as 1 | 2 }).then((result) => {
+                          flash(
+                            result.ok
+                              ? { tone: "ok", text: `${displayName(selected)} is set for ${hours} hour${hours === 2 ? "s" : ""}.` }
+                              : { tone: "no", text: result.reason },
+                          );
+                        });
+                      }}
+                      className={`min-h-11 rounded-md border-2 font-extrabold ${on ? "border-accent bg-accent text-accent-ink" : "border-border bg-surface"}`}
+                    >
+                      {hours} hour{hours === 2 ? "s" : ""}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1 text-xs font-bold text-muted">Game turns on /ninja. Two hours get a second turn after the cave code changes.</p>
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {[5, 10, 25].map((amount) => (
                   <button
@@ -615,7 +641,7 @@ export function SenseiDesk() {
           <div className="mt-3 rounded-lg border-2 border-border bg-surface p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="max-w-xl text-sm font-bold text-muted">
-                Daily and weekly bonuses skip the 25-coin payout and the 75-a-day cap. Each ninja can earn one once.
+                Daily and weekly bonuses skip the 25-coin payout and the 75-a-day cap. Each ninja can earn one once. Game coins and EXP skip the 75 cap too.
                 {selected ? ` Paying ${displayName(selected)}` : " Pick a ninja first."}
               </p>
               <button

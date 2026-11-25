@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as NinjaRouteImport } from './routes/ninja'
 import { Route as SenseiRouteImport } from './routes/sensei'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NinjaRoute = NinjaRouteImport.update({
+  id: '/ninja',
+  path: '/ninja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SenseiRoute = SenseiRouteImport.update({
@@ -25,27 +31,31 @@ const SenseiRoute = SenseiRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ninja': typeof NinjaRoute
   '/sensei': typeof SenseiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ninja': typeof NinjaRoute
   '/sensei': typeof SenseiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ninja': typeof NinjaRoute
   '/sensei': typeof SenseiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sensei'
+  fullPaths: '/' | '/ninja' | '/sensei'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sensei'
-  id: '__root__' | '/' | '/sensei'
+  to: '/' | '/ninja' | '/sensei'
+  id: '__root__' | '/' | '/ninja' | '/sensei'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  NinjaRoute: typeof NinjaRoute
   SenseiRoute: typeof SenseiRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ninja': {
+      id: '/ninja'
+      path: '/ninja'
+      fullPath: '/ninja'
+      preLoaderRoute: typeof NinjaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sensei': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  NinjaRoute: NinjaRoute,
   SenseiRoute: SenseiRoute,
 }
 export const routeTree = rootRouteImport

@@ -19,6 +19,7 @@ import {
   periodKey,
   todayKey,
 } from "@/lib/dojo/rules";
+import { isTestNinja } from "@/lib/dojo/games";
 import { SEED_ACHIEVEMENTS, seedEvents, SEED_ITEMS, SEED_STUDENTS } from "@/lib/dojo/seed";
 import {
   BELT_RANK,
@@ -76,6 +77,7 @@ type StudentRow = {
   day_coins: number | string | null;
   last_award_at: number | string | null;
   exp?: number | string | null;
+  visit_hours?: number | string | null;
 };
 
 type ItemRow = {
@@ -141,6 +143,7 @@ function mapStudent(row: StudentRow): Student {
     dayKey: row.day_key ?? undefined,
     dayCoins: num(row.day_coins),
     lastAwardAt: row.last_award_at == null ? undefined : num(row.last_award_at),
+    visitHours: num(row.visit_hours) === 2 ? 2 : 1,
   };
 }
 
@@ -281,7 +284,7 @@ async function snapshot(sql: Sql, dojoId: string, role: DojoRole = "sensei", zon
   await tickMine(sql, dojoId);
   const banks = await sql<{ vault: number | string }>`select vault from dojos where id = ${dojoId}`;
   const students = await sql<StudentRow>`
-    select id, first_name, last_initial, belt, coins, exp, week_coins, archived, day_key, day_coins, last_award_at
+    select id, first_name, last_initial, belt, coins, exp, week_coins, archived, day_key, day_coins, last_award_at, visit_hours
     from students where dojo_id = ${dojoId}
     order by archived, first_name
   `;
@@ -625,6 +628,31 @@ async function ensurePhoneCode(sql: Sql, dojo: DojoRow, zoneInput?: string) {
   return { code, hour, until: nextHourLabel(zone), zone };
 }
 
+export async function matchCaveCode(phone: string) {
+  const sql = await getSql();
+  const dojo = await findDojo(sql, CENTER_CODE);
+  if (!dojo) return { ok: false as const, reason: "The cave is not open yet." };
+  let weekStarted = num(dojo.week_started);
+  if (Date.now() - weekStarted >= WEEK_MS) {
+    weekStarted = Date.now();
+    await sql`update dojos set week_started = ${weekStarted} where id = ${dojo.id}`;
+    await sql`update students set week_coins = 0 where dojo_id = ${dojo.id}`;
+    dojo.week_started = weekStarted;
+  }
+  const pass = await ensurePhoneCode(sql, dojo);
+  if (normalizePhone(phone) !== pass.code) {
+    return { ok: false as const, reason: "That code isn't on the cave right now." };
+  }
+  return {
+    ok: true as const,
+    sql,
+    dojo,
+    hour: pass.hour,
+    day: todayKey(),
+    week: periodKey("weekly", weekStarted),
+  };
+}
+
 async function connected(code: string, role: DojoRole, phone?: string, zone?: string) {
   if (normalizeCode(code) !== CENTER_CODE) return { ok: false as const, reason: "This center has one cave." };
   const sql = await getSql();
@@ -728,6 +756,49 @@ export async function unlockDirector(code: string, pin: string, phone = "") {
     where id = ${dojo.id}
   `;
   return { ok: true as const, token, until };
+}
+
+export async function grantTypingAward(sql: Sql, dojoId: string, studentId: string, requested: number, words: number) {
+  const gain = Math.max(0, Math.floor(requested));
+  const students = await sql<StudentRow>`
+    select id, first_name, last_initial, belt, coins, exp, week_coins, archived, day_key, day_coins, last_award_at
+    from students where id = ${studentId} and dojo_id = ${dojoId} and archived = false
+  `;
+  const student = students[0] ? mapStudent(students[0]) : null;
+  if (!student) return { coins: 0, exp: 0 };
+  const banks = await sql<{ vault: number | string; last_redeem_at: number | string }>`
+    select vault, last_redeem_at from dojos where id = ${dojoId}
+  `;
+  const bank = banks[0];
+  const now = Date.now();
+  const pay = gain;
+  const fromVault = Math.min(pay, Math.max(0, num(bank?.vault)));
+  if (pay <= 0) return { coins: 0, exp: 0 };
+  const name = displayName(student);
+  const line = `${name} typed ${words} words for ${pay} coins.`;
+  const event = scene({ kind: "award", studentName: name, detail: `+${pay} coins`, line, coins: pay });
+  await sql`update dojos set vault = greatest(0, vault - ${fromVault}) where id = ${dojoId}`;
+  await sql`
+    update students
+    set coins = coins + ${pay},
+        week_coins = week_coins + ${pay},
+        exp = exp + ${pay}
+    where id = ${studentId} and dojo_id = ${dojoId}
+  `;
+  await insertEvent(sql, dojoId, event);
+  await pushUndo(sql, {
+    dojoId,
+    kind: "achieve",
+    studentId,
+    itemId: null,
+    amount: pay,
+    eventId: event.id,
+    label: `Undo game +${pay} · ${name}`,
+    actionDay: todayKey(now),
+    prevLastAward: student.lastAwardAt ?? null,
+    prevLastRedeem: num(bank?.last_redeem_at),
+  });
+  return { coins: pay, exp: pay };
 }
 
 export async function awardCoins(code: string, studentId: string, amount: number, phone = "", token = ""): Promise<SnapOk | Fail> {
@@ -1167,7 +1238,7 @@ export async function addStudent(
 export async function updateStudent(
   code: string,
   studentId: string,
-  patch: { firstName?: string; lastInitial?: string; belt?: string; coins?: number; archived?: boolean },
+  patch: { firstName?: string; lastInitial?: string; belt?: string; coins?: number; archived?: boolean; visitHours?: number },
   token?: string,
   phone = "",
 ): Promise<SnapOk | Fail> {
@@ -1222,6 +1293,9 @@ export async function updateStudent(
   else if (belt !== prev.belt) event = scene({ kind: "belt", studentName: name, detail: belt, line: beltLine(name, belt), coins: 0 });
   else if (name !== displayName(prev)) event = scene({ kind: "welcome", studentName: name, detail: "rename", line: renameLine(name), coins: 0 });
   if (event) await insertEvent(linked.sql, linked.dojo.id, event);
+  if (patch.visitHours === 1 || patch.visitHours === 2) {
+    await linked.sql`update students set visit_hours = ${patch.visitHours} where id = ${studentId} and dojo_id = ${linked.dojo.id}`;
+  }
   return { ok: true, snapshot: await snapshot(linked.sql, linked.dojo.id) };
 }
 
@@ -1433,12 +1507,19 @@ function coinText(value: number) {
   return value.toLocaleString("en-US");
 }
 
+function isGameAward(event: EventRow) {
+  return event.kind === "award" && event.line.includes(" typed ");
+}
+
 function isAchievement(event: EventRow) {
   return event.kind === "award" && event.line.includes(" finished ");
 }
 
 function auditKind(event: EventRow) {
-  if (event.kind === "award") return isAchievement(event) ? "Achievement" : "Payout";
+  if (event.kind === "award") {
+    if (isGameAward(event)) return "Game";
+    return isAchievement(event) ? "Achievement" : "Payout";
+  }
   if (event.kind === "welcome") return event.detail === "rename" ? "Rename" : "Welcome";
   if (event.kind === "redeem") return num(event.coins) > 0 ? "Shop" : "EXP";
   if (event.kind === "undo") return "Undo";
@@ -1487,7 +1568,11 @@ export async function dayLedger(
   const mined = events.filter((event) => event.kind === "mine");
   const sumKind = (kind: string) => events.reduce((sum, event) => sum + (event.kind === kind ? num(event.coins) : 0), 0);
   const awardCoins = (achievement: boolean) =>
-    events.reduce((sum, event) => sum + (event.kind === "award" && isAchievement(event) === achievement ? num(event.coins) : 0), 0);
+    events.reduce((sum, event) => {
+      if (event.kind !== "award" || isGameAward(event)) return sum;
+      return sum + (isAchievement(event) === achievement ? num(event.coins) : 0);
+    }, 0);
+  const gameCoins = events.reduce((sum, event) => sum + (isGameAward(event) ? num(event.coins) : 0), 0);
   const students = [...linked.snapshot.students].sort((a, b) => {
     if (a.archived !== b.archived) return a.archived ? 1 : -1;
     return displayName(a).localeCompare(displayName(b));
@@ -1561,6 +1646,7 @@ export async function dayLedger(
     ["Date", label],
     ["Vault", linked.snapshot.vault],
     ["Paid out", awardCoins(false)],
+    ["Games", gameCoins],
     ["Spent at the shop", sumKind("redeem")],
     ["Achievements", awardCoins(true)],
     ["Welcome coins", sumKind("welcome")],

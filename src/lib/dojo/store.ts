@@ -71,7 +71,7 @@ type DojoStore = {
   >;
   updateStudent: (
     studentId: string,
-    patch: { firstName?: string; lastInitial?: string; belt?: Belt; coins?: number; archived?: boolean },
+    patch: { firstName?: string; lastInitial?: string; belt?: Belt; coins?: number; archived?: boolean; visitHours?: 1 | 2 },
   ) => Promise<RedeemResult>;
   addItem: (input: Omit<ShopItem, "id">) => Promise<string>;
   updateItem: (itemId: string, patch: Partial<Omit<ShopItem, "id">>) => Promise<RedeemResult>;

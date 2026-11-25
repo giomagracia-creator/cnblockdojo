@@ -44,6 +44,7 @@ export type Student = {
   dayKey?: string;
   dayCoins?: number;
   lastAwardAt?: number;
+  visitHours?: 1 | 2;
 };
 
 export type Achievement = {

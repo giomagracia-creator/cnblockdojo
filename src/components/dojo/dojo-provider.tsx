@@ -6,7 +6,7 @@ export function DojoProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let stop = false;
     const tick = async () => {
-      if (stop) return;
+      if (stop || window.location.pathname.startsWith("/ninja")) return;
       const role = window.location.pathname.startsWith("/sensei") ? "sensei" : "display";
       await useDojo.getState().refresh(role);
     };

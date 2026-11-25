@@ -103,7 +103,7 @@ var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 * the dev styles URL for route-scoped CSS collection.
 */
 async function getStartManifest(matchedRoutes) {
-	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-DSdsfQQp.mjs");
+	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-B7jwUnKu.mjs");
 	const startManifest = tsrStartManifest();
 	let routes = startManifest.routes;
 	routes[rootRouteId];
@@ -125,87 +125,135 @@ async function getStartManifest(matchedRoutes) {
 var manifest = {
 	"01007627e4778cfafa45ee98d4d44c69a2fa0f00aaa5da99037679ca0b2d75ea": {
 		functionName: "openDojoFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"0a210339eab04976cf44ed339fdf7a10ecfb72abe475103946828f16d320e11d": {
 		functionName: "joinDojoFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"0c4612d73b58455c81113da90994b659d7ab1144b5a80804bac1f4e9770bfff5": {
 		functionName: "updateItemFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"16766b607eb7dc0f41d375c69584246f9048cc0e4fa6ef5bfcaf6b7eb2fcd2d1": {
 		functionName: "restoreDemoFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"252e9eb369b679e8921247c1292194fb3195976d6fcdc884ab48341bf369541e": {
+		functionName: "ninjaMatchTypeFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"28ab62336983699603a348faf5cc874a00076d856f1cc87f7d47cb323fe3501e": {
+		functionName: "ninjaBoardFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"2bdea30a1d268005cb6e2d01547e98d67bb67cec27e03921bafe82b1ee9a9314": {
+		functionName: "playStoryFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"2f46918d902970366326f3417de88440ad62789a7b4a3dc80bd176bccc00a745": {
+		functionName: "ninjaFinishFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"361c20cc87c92c7f2ddfe952c2f40c21d1c5460e1f2151d780b8b99d7093e384": {
 		functionName: "addStudentFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"38d844e469f5d1ae979b66222b9f2c83997c7e5ddb432e0a83340e393b587ccf": {
 		functionName: "removeAchievementFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"3b088e1bda10565e3e5947f87c2d325a366925b01b87cb6599a252c7054ca981": {
 		functionName: "addAchievementFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"3c557123f18803d7a183dbd0a74b2db84bfa01ba04a2bc8a8aecea03a7a6b8ab": {
+		functionName: "ninjaQueuePollFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"3efdb7d4e4ca78ca0dd6f335ea3cf4770936c5e1ed984af0282e7112531d534c": {
 		functionName: "updateStudentFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"4404f775bc16d8c6ff7d069ac2f5c4d3b0c76bebab7ee453b0c1cc32940cbee7": {
+		functionName: "ninjaMatchStateFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"595b0b2a50d8ef7e50601d6fb67151adf331217691afd96887e78f8334fef23c": {
+		functionName: "callPocketFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"608c0cc4529327f417c109464f7bbe17ff77ff864855598399fbee622defa1a5": {
+		functionName: "ninjaQueueReadyFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"63f9ba84443a71aae46c3515e064c3b9a934bfb68032d9ffb0523db9044b5f27": {
 		functionName: "dismissCeremonyFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"679088b81c334e46e33c1ebe2eefb73c499d911530643173750d980245a5eed9": {
+		functionName: "ninjaQueueCloseFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"6ebcfe0aa8c769ee9ea96fabaf50aa500588b56f8c19b1c0b2c3f690a1d5b826": {
 		functionName: "awardCoinsFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"88dac1e25ce49137330540779f84bbaf4e8803ef9da8bf41c15ba0b6997a2975": {
 		functionName: "undoLastFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"920ca664e56844d30ea77fa5361d89d2bc117f915f07846893a65f7b5ebe8dc2": {
 		functionName: "pullDojoFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"974c4116d59f0ab81ef6bca99bf6f04e7d33b77962a444b53cf9af2f3fc29c11": {
 		functionName: "redeemItemFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"a1882d78c0f8ab92f9d5eae759711d84a1e602262ae25be97686dbd9866380f0": {
 		functionName: "addItemFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"a49ed05181709b292ae82c7729433ecd7d6eddc00e3fa0d63e8adf276a13b9ea": {
+		functionName: "ninjaRosterFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"aa5a5d967abce3d2a159d542e4f5bc4736b554e5b8786ddfe03853e38e1d7b8b": {
 		functionName: "dayLedgerFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"b5d5e8c4b2d21e110c1ccd0611606bf7aed5ff08ffb98890f8c54e3bed3ee9b1": {
+		functionName: "ninjaStartFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"b90a6ebcbe244f8c451f76f23eb578ff9af6a789ac9445da8f26b278321e0e50": {
 		functionName: "updateAchievementFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"bfe2f3d7d5deeb3f55b125cd67249c001f946cc36574e3b2d08343a339d48fc4": {
 		functionName: "removeItemFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"c5c2d6fd31f8975d6c321cbc20b6d33fd0f331e71a8708d0fea0b7a87be57a5b": {
 		functionName: "setHeroFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"cd1a48342ab90e15ca7ebfdd7640747424f8ee7c3b3b86d3b7a2d77d864e961e": {
 		functionName: "promoteBeltFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"d6ca85a2f7c9c19c13257f645ad3fbfc572b6a4139e71f4c511a8601e974d348": {
 		functionName: "claimAchievementFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
+	},
+	"ecd146c418aa61784abb3c4ff6595fb699fa1b0a9dad971ef21c0d689fc708c4": {
+		functionName: "ninjaQueueLockFn_createServerFn_handler",
+		importer: () => import("./api-CVjNcOTH.mjs")
 	},
 	"f51cdb255e78467427c6d43e3b79d6495842a660fb8abdaa0cfecbb553c6fa4f": {
 		functionName: "unlockDirectorFn_createServerFn_handler",
-		importer: () => import("./api-DJNA6sag.mjs")
+		importer: () => import("./api-CVjNcOTH.mjs")
 	}
 };
 async function getServerFnById(id, access) {
@@ -1610,7 +1658,7 @@ var getBaseManifest = getProdBaseManifest;
 var createEarlyHintsForRequest = createEarlyHintsCollector;
 async function loadEntries() {
 	const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-		import("./router-DUnVjQu-.mjs").then((n) => n.t),
+		import("./router-CRn3DRXT.mjs").then((n) => n.t),
 		import("./start-5Z2QO8AU.mjs"),
 		import("./empty-plugin-adapters-D9UWiqvJ.mjs")
 	]);
